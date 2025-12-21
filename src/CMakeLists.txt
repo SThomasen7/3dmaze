@@ -14,6 +14,7 @@ file(GLOB SOURCE_FILES
   engine/*.cpp
   entity/*.cpp
   system/*.cpp
+  util/*.cpp
   #${IMGUI_SOURCES}
 )
 
@@ -40,6 +41,7 @@ target_include_directories(MazeLib PUBLIC
   engine/
   entity/
   system/
+  util/
 )
 
 target_include_directories(MazeTestLib PUBLIC
@@ -71,10 +73,5 @@ target_link_libraries(MazeLib PRIVATE
 )
 
 target_link_libraries(MazeTestLib PRIVATE 
-  OpenGL::GL 
-  glfw 
-  GLEW::GLEW
-# ${LIBXML++_LIBRARIES}
-  assimp
   MazeLib
 )
