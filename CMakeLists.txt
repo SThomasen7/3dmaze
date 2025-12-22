@@ -2,6 +2,16 @@
 cmake_minimum_required(VERSION 3.16)
 project(Maze)
 
+find_program(CTAGS_EXECUTABLE ctags)
+
+if (CTAGS_EXECUTABLE)
+    add_custom_target(tags
+        COMMAND ${CTAGS_EXECUTABLE} -R . --exclude=third_party --languages=C,C++
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        COMMENT "Generating ctags"
+    )
+endif()
+
 # Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

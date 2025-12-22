@@ -1,7 +1,5 @@
 #include "entity_manager.h"
 
-EntityManager ENTITY_MANAGER;
-
 using std::initializer_list;
 using std::type_index;
 

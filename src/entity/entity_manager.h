@@ -65,5 +65,4 @@ private:
 
 };
 
-extern EntityManager ENTITY_MANAGER;
 #endif

@@ -4,7 +4,7 @@ build/
 *.out
 *.log
 *.err
-src/third_party/
+third_party/
 *.swp
 cmake-build-*/
 CMakeCache.txt
@@ -19,3 +19,4 @@ imgui.ini
 test
 maze
 test_output/
+tags

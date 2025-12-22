@@ -1,10 +1,12 @@
-#include "entity.h"
+#include "engine.h"
 #include <iostream>
 
-using std::cout;
-using std::endl;
-
 int main(void){
+  Engine engine;
+
+  engine.init();
+  engine.execute();
+  engine.shutdown();
 
   return 0;
 

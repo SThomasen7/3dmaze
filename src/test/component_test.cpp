@@ -3,12 +3,14 @@
 #include <iostream>
 #include <memory>
 
+
 MAKE_TEST(ComponentPoolTest){
+  EntityManager entity_manager;
   TEST_START();
 
   ComponentPool<int> pool;
-  Entity entity1 = ENTITY_MANAGER.createEntity();
-  Entity entity2 = ENTITY_MANAGER.createEntity();
+  Entity entity1 = entity_manager.createEntity();
+  Entity entity2 = entity_manager.createEntity();
 
   CHECK_FALSE(pool.contains(entity1));
   CHECK_FALSE(pool.contains(entity1));

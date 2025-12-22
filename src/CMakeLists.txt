@@ -1,13 +1,14 @@
 # Set GLFW, OpenGL, and ImGui source directories
-# set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
 
 # add ImGui source files
-# file(GLOB IMGUI_SOURCES
-# ${IMGUI_DIR}/*.cpp
-# ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
-# ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
-# )
-set(GLM_DIR ${CMAKE_SOURCE_DIR}/../third_party/glm)
+file(GLOB IMGUI_SOURCES
+  ${IMGUI_DIR}/*.cpp
+  ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+  ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+)
+
+set(GLM_DIR ${CMAKE_SOURCE_DIR}/third_party/glm)
 
 file(GLOB SOURCE_FILES
   component/*.cpp
@@ -15,7 +16,9 @@ file(GLOB SOURCE_FILES
   entity/*.cpp
   system/*.cpp
   util/*.cpp
-  #${IMGUI_SOURCES}
+  manager/*.cpp
+  scene/*.cpp
+  ${IMGUI_SOURCES}
 )
 
 file(GLOB TEST_FILES
@@ -37,11 +40,14 @@ add_library(MazeTestLib
 # Include directories
 target_include_directories(MazeLib PUBLIC
   ${GLM_DIR}
+  ${IMGUI_DIR}
   component/
   engine/
   entity/
   system/
   util/
+  manager/
+  scene/
 )
 
 target_include_directories(MazeTestLib PUBLIC
@@ -54,7 +60,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
 # find_package(LibXml2 REQUIRED)
-# find_package(assimp REQUIRED)
+find_package(assimp REQUIRED)
 # find_package(PkgConfig REQUIRED)
 
 # pkg_check_modules(LIBXML++ REQUIRED libxml++-2.6)
