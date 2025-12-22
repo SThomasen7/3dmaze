@@ -83,6 +83,12 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
           break;
         }
       }
+      else if(arg_type_id == std::type_index(typeid(CameraComponent))){
+        if(!camera_pool.contains(entity)){
+          found = false;
+          break;
+        }
+      }
 
     }
     if(found){
@@ -211,5 +217,18 @@ LightAngleComponent& EntityManager::getLightAngle(Entity& entity){
 
 LightAngleComponent EntityManager::getLightAngle(const Entity& entity) const{
   return light_angle_pool.at(entity);
+}
+
+void EntityManager::addCameraComponent(
+    const Entity& entity, CameraComponent camera){
+  camera_pool[entity] = camera;
+}
+
+CameraComponent& EntityManager::getCamera(Entity& entity){
+  return camera_pool.at(entity);
+}
+
+CameraComponent EntityManager::getCamera(const Entity& entity) const{
+  return camera_pool.at(entity);
 }
 

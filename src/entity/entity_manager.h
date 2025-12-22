@@ -12,6 +12,7 @@
 #include "light_component.h"
 #include "light_direction_component.h"
 #include "light_angle_component.h"
+#include "camera_component.h"
 
 class EntityManager{
 
@@ -71,6 +72,10 @@ public:
   LightAngleComponent& getLightAngle(Entity& entity);
   LightAngleComponent getLightAngle(const Entity& entity) const;
 
+  void addCameraComponent(const Entity& entity, CameraComponent camera);
+  CameraComponent& getCamera(Entity& entity);
+  CameraComponent getCamera(const Entity& entity) const;
+
   // Iterator functions
   iterator begin();
   iterator end();
@@ -100,6 +105,7 @@ private:
   ComponentPool<LightComponent> light_pool;
   ComponentPool<LightDirectionComponent> light_direction_pool;
   ComponentPool<LightAngleComponent> light_angle_pool;
+  ComponentPool<CameraComponent> camera_pool;
 
 };
 

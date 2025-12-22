@@ -33,7 +33,6 @@ add_library(MazeLib
 )
 
 add_library(MazeTestLib 
-  ${SOURCE_FILES}
   ${TEST_FILES}
 )
 
