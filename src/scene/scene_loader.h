@@ -9,6 +9,7 @@ class SceneLoader{
 
 public:
   static void load(Scene& scene, std::string filename);
+  static void free(Scene& scene, std::string filename);
 
 private:
   SceneLoader() {};

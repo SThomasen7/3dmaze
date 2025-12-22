@@ -1,6 +1,7 @@
 #include "engine.h"
 #include "logger.h"
 #include "scene_loader.h"
+#include "consts.h"
 
 Engine::Engine(){
   settings = {
@@ -39,5 +40,5 @@ void Engine::shutdown(){
 }
 
 void Engine::loadScene(std::string filename){
-  SceneLoader::load(scene, filename);
+  SceneLoader::load(scene, asset_path+std::string("scenes/")+filename);
 }

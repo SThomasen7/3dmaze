@@ -1,47 +1,51 @@
 #include "scene_loader.h"
-/*#include <fstream>
-#include <libxml/parser.h>
-#include <libxml/xmlschemas.h>
-#include <vector>
-#include <stdexcept>
+#include "logger.h"
 #include "transform_component.h"
 #include "mesh_loader.h"
 #include "shader_loader.h"
-#include "light_manager.h"
-#include "component_manager.h"
-#include "camera.h"
-#include "asset.h"
-#include "logger.h"
 #include "consts.h"
 
+#include "transform_component.h"
+#include "camera_component.h"
+#include "mesh_component.h"
+#include "shader_component.h"
+#include "light_component.h"
+#include "position_component.h"
+#include "light_direction_component.h"
+#include "light_angle_component.h"
+
+#include <libxml/parser.h>
+#include <libxml/xmlschemas.h>
+#include <fstream>
+#include <vector>
+#include <stdexcept>
 #include <iostream>
+
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 
 const std::string scene_validation_file = base_dir+std::string("/src/misc/scene_validate.xsd");
 
 // Helper function declarations
-void create_scene_nodes(std::shared_ptr<Scene> scene_node, xmlNodePtr& xml_node);
+void create_scene_nodes(EntityManager& entity_manager, xmlNodePtr& xml_node);
 
-std::shared_ptr<Camera> create_camera_entity(xmlNodePtr& node);
-std::shared_ptr<Light> create_directionallight_entity(xmlNodePtr& node);
-std::shared_ptr<Light> create_spotlight_entity(xmlNodePtr& node);
-std::shared_ptr<Light> create_pointlight_entity(xmlNodePtr& node);
-std::shared_ptr<Asset> create_asset_entity(xmlNodePtr& node);
-std::shared_ptr<TransformComponent> create_transform(xmlNodePtr& node);
-std::shared_ptr<MeshComponent> create_mesh(xmlNodePtr& node);
-std::shared_ptr<ShaderComponent> create_shader(xmlNodePtr& node);
+void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
+void create_light_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
+void create_transform_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
+void create_mesh_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
+void create_shader_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
 
 glm::vec3 load_vec3(xmlNodePtr& node);
 glm::vec4 load_vec4(xmlNodePtr& node);
-bool is_named(xmlNodePtr& node, std::string name);
+//bool is_named(xmlNodePtr& node, std::string name);
 std::string get_name(xmlNodePtr& node);
 // End helper function declarations
 
-std::shared_ptr<Scene> SceneLoader::loadScene(std::string filename){
- // Load the schema
+void SceneLoader::load(Scene& scene, std::string filename){
   xmlSchemaParserCtxtPtr schema_ctxt = xmlSchemaNewParserCtxt(scene_validation_file.c_str());
   if (!schema_ctxt) {
     LOG(LL::Error, "Could not load schema context from ", scene_validation_file);
-    return nullptr;
   }
 
   xmlSchemaPtr schema = xmlSchemaParse(schema_ctxt);
@@ -49,7 +53,6 @@ std::shared_ptr<Scene> SceneLoader::loadScene(std::string filename){
 
   if (!schema) {
     LOG(LL::Error, "Could not parse schema context from ", scene_validation_file);
-    return nullptr;
   }
 
   // Create a validation context
@@ -57,7 +60,6 @@ std::shared_ptr<Scene> SceneLoader::loadScene(std::string filename){
   if (!valid_ctxt) {
     LOG(LL::Error, "Could not schema validation context from ", scene_validation_file);
     xmlSchemaFree(schema);
-    return nullptr;
   }
 
   // Parse the XML file
@@ -66,141 +68,68 @@ std::shared_ptr<Scene> SceneLoader::loadScene(std::string filename){
     LOG(LL::Error, "Could not parse XML file from ", filename);
     xmlSchemaFreeValidCtxt(valid_ctxt);
     xmlSchemaFree(schema);
-    return nullptr;
   }
 
   // Validate the XML file
   int ret = xmlSchemaValidateDoc(valid_ctxt, doc);
   if(ret > 0){
     LOG(LL::Error, filename, " XML file is invalid according to ", scene_validation_file);
-    return nullptr;
   } else if (ret < 0) {
     LOG(LL::Error, "Validation has generated an internal eror");
-    return nullptr;
   }
 
   xmlNodePtr root = xmlDocGetRootElement(doc);
-  std::shared_ptr<Scene> scene(new Scene);
-
-  create_scene_nodes(scene, root);
+  EntityManager& entity_manager = scene.getEntityManager();
+  create_scene_nodes(entity_manager, root);
 
   // Cleanup
   xmlFreeDoc(doc);
   xmlSchemaFreeValidCtxt(valid_ctxt);
   xmlSchemaFree(schema);
   xmlCleanupParser();
-
-  return scene;
-}
-
-void SceneLoader::dumpScene(std::shared_ptr<Scene> scene, std::string filename){
-  std::ofstream out_file(filename);
-
-  if(!out_file.is_open()){
-    LOG(LL::Error, "Could not open output file in sceneloader: ", filename, '.');
-    throw std::runtime_error(filename+" could not be opened for write.");
-  }
-
-  out_file << scene->getRepresentation();
-  out_file.close();
-
-  LOG(LL::Info, "Scene write to file ", filename, " was successful.");
 }
 
 
 // Recursively load all of the children nodes.
-void create_scene_nodes(std::shared_ptr<Scene> scene, xmlNodePtr& xml_node){
+void create_scene_nodes(EntityManager& entity_manager, xmlNodePtr& xml_node){
 
-  std::vector<std::shared_ptr<Camera>>& cameras = scene->getCameras();
-  std::vector<std::shared_ptr<Light>>& lights = scene->getLights();
-  std::vector<std::shared_ptr<Asset>>& assets = scene->getAssets();
-  std::shared_ptr<Entity> entity = nullptr;
   bool is_root = false;
+  // An entity is wasted on the scene, but that's ok.
+  Entity entity = entity_manager.createEntity();
   if(xml_node->type == XML_ELEMENT_NODE 
       && xmlStrEqual(xml_node->name, BAD_CAST "scene")){
-    // the entity is already set, do nothing.
     is_root = true;
   }
   else if(xml_node->type == XML_ELEMENT_NODE 
       && xmlStrEqual(xml_node->name, BAD_CAST "camera")){
-    std::shared_ptr<Camera> camera = create_camera_entity(xml_node);
-    cameras.push_back(camera);
-    entity = std::static_pointer_cast<Entity>(camera);
+    create_camera_component(entity_manager, entity, xml_node);
   }
   else if(xml_node->type == XML_ELEMENT_NODE 
-      && xmlStrEqual(xml_node->name, BAD_CAST "point_light")){
-    std::shared_ptr<Light> light = create_pointlight_entity(xml_node);
-    lights.push_back(light);
-    entity = std::static_pointer_cast<Entity>(light);
-  }
-  else if(xml_node->type == XML_ELEMENT_NODE 
-      && xmlStrEqual(xml_node->name, BAD_CAST "spot_light")){
-    std::shared_ptr<Light> light = create_spotlight_entity(xml_node);
-    lights.push_back(light);
-    entity = std::static_pointer_cast<Entity>(light);
-  }
-  else if(xml_node->type == XML_ELEMENT_NODE 
-      && xmlStrEqual(xml_node->name, BAD_CAST "directional_light")){
-    std::shared_ptr<Light> light = create_directionallight_entity(xml_node);
-    lights.push_back(light);
-    entity = std::static_pointer_cast<Entity>(light);
-  }
-  else if(xml_node->type == XML_ELEMENT_NODE 
-      && xmlStrEqual(xml_node->name, BAD_CAST "asset")){
-    std::shared_ptr<Asset> asset = create_asset_entity(xml_node);
-    assets.push_back(asset);
-    entity = std::static_pointer_cast<Entity>(asset);
+      && xmlStrEqual(xml_node->name, BAD_CAST "light")){
+    create_light_component(entity_manager, entity, xml_node);
   }
 
   // Check if any of the child nodes are components
   for (xmlNodePtr cur = xml_node->children; cur != NULL; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "transformation")) {
-      // add a transformation component to this node.
-      std::shared_ptr<TransformComponent> transform;
-      transform = create_transform(cur);
-
-      // register the component.
-      if(transform != nullptr){
-        component_manager->addTransformComponent(entity->getId(), transform); 
-      }
-
+      create_transform_component(entity_manager, entity, cur);
       continue;
     }
     else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "mesh")) {
-
-      // add a mesh component to the entity
-      std::shared_ptr<MeshComponent> mesh;
-      mesh = create_mesh(cur);
-
-      if(mesh != nullptr){
-        component_manager->addMeshComponent(entity->getId(), mesh); 
-      }
+      create_mesh_component(entity_manager, entity, cur);
       continue;
     }
     else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "shader")) {
-
-      // add a mesh component to the entity
-      std::shared_ptr<ShaderComponent> shader;
-      shader = create_shader(cur);
-
-      if(shader != nullptr){
-        component_manager->addShaderComponent(entity->getId(), shader); 
-      }
+      create_shader_component(entity_manager, entity, cur);
       continue;
     }
-
-    create_scene_nodes(scene, cur);
+    create_scene_nodes(entity_manager, cur);
   }
 }
 
-std::shared_ptr<Camera> create_camera_entity(xmlNodePtr& node){
-  /*<camera name="camera_1" fov="60" buffer_x="100" buffer_y="100" z_near="1" z_far="10" projection_type="perspective">
-    <vec3 name="up" x="0" y="1" z="0"></vec3>
-    <vec3 name="lookat" x="1" y="0" z="0"></vec3>
-    <vec3 name="right" x="0" y="0" z="1"></vec3>
-    <vec3 name="position" x="0.2" y="0.2" z="0.2"></vec3>
-  </camera>*/
-  /*
+void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+  LOG(LL::Verbose, "Loading camera component.");
+  
   float fov;
   float buffer_x, buffer_y;
   float z_near, z_far;
@@ -210,10 +139,10 @@ std::shared_ptr<Camera> create_camera_entity(xmlNodePtr& node){
   // get the children nodes
   for (xmlNodePtr cur = node->children; cur != NULL; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "up")) {
-      up = load_vec3(cur);
+      up = glm::normalize(load_vec3(cur));
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "lookat")) {
-      lookat = load_vec3(cur);
+      lookat = glm::normalize(load_vec3(cur));
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "position")) {
       position = load_vec3(cur);
@@ -250,10 +179,23 @@ std::shared_ptr<Camera> create_camera_entity(xmlNodePtr& node){
     type = CameraProjection::Orthographic;
   }
 
-  std::shared_ptr<Camera> camera = std::make_shared<Camera>(up, lookat, position, type);
-  camera->setFov(fov);
-  camera->setBufferDimensions(buffer_x, buffer_y);
-  camera->setClippingPlane(z_near, z_far);
+  entity_manager.addCameraComponent(entity,
+      {
+        up, lookat, glm::cross(up, lookat),
+        type,
+        fov,
+        buffer_x,
+        buffer_y,
+        z_near,
+        z_far
+      }
+  );
+
+  entity_manager.addPositionComponent(entity,
+      {
+        position
+      }
+  );
 
   // Free the attribute values
   xmlFree(fov_cstr);
@@ -262,139 +204,95 @@ std::shared_ptr<Camera> create_camera_entity(xmlNodePtr& node){
   xmlFree(z_near_cstr);
   xmlFree(z_far_cstr);
   xmlFree(projection_type_cstr);
-
-  return camera;
-
 }
 
-std::shared_ptr<Light> create_directionallight_entity(xmlNodePtr& node){
+void create_light_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
 
-  glm::vec3 color, direction;
+  LOG(LL::Verbose, "Loading light component.");
+  glm::vec3 color, position, direction;
+  bool has_direction, has_position = false;
+  float attenuation, angle;
+  std::string atteuation_type;
+
   for (xmlNodePtr cur = node->children; cur != NULL; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "color")) {
       color = load_vec3(cur);
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "direction")) {
       direction = load_vec3(cur);
-    }
-  }
-
-  std::shared_ptr<DirectionalLight> directional_light = 
-    light_manager->addDirectionalLight(color, direction);
-
-  return directional_light;
-
-}
-
-std::shared_ptr<Light> create_spotlight_entity(xmlNodePtr& node){
-
-  float attenuation, angle;
-  std::string atteuation_type;
-  glm::vec3 color, position, direction;
-  for (xmlNodePtr cur = node->children; cur != NULL; cur = cur->next) {
-    if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "color")) {
-      color = load_vec3(cur);
+      has_direction = true;
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "position")) {
       position = load_vec3(cur);
+      has_position = true;
     }
-    if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "direction")) {
-      direction = load_vec3(cur);
-    }
+  }
+
+  if(has_direction){
+    entity_manager.addLightDirectionComponent(entity,
+        {
+          direction 
+        }
+    );
+  }
+
+  if(has_position){
+    entity_manager.addPositionComponent(entity,
+        {
+          position 
+        }
+    );
   }
 
   xmlChar *att_cstr = xmlGetProp(node, BAD_CAST "attenuation");
   xmlChar *angle_cstr = xmlGetProp(node, BAD_CAST "angle");
   xmlChar *att_t_cstr = xmlGetProp(node, BAD_CAST "attenuation_type");
+  std::string att, angle_str, att_t;
 
   // Convert xmlChar* to std::string
-  std::string att(reinterpret_cast<const char*>(att_cstr));
-  std::string angle_str(reinterpret_cast<const char*>(angle_cstr));
-  std::string att_t(reinterpret_cast<const char*>(att_t_cstr));
-
-  // Convert string to float
-  attenuation = std::stof(att);  
-  angle = std::stof(angle_str);
-  LightAttenuationType type;
-  if(att_t == "constant"){
-    type = LightAttenuationType::Constant;
-  }
-  else if(att_t == "linear"){
-    type = LightAttenuationType::Linear;
+  if(att_cstr != NULL){
+    std::string att(reinterpret_cast<const char*>(att_cstr));
+    attenuation = std::stof(att);  
   }
   else{
-    type = LightAttenuationType::Quadratic;
+    attenuation = 1.0f;
   }
 
-  std::shared_ptr<SpotLight> spot_light = light_manager->addSpotLight(
-      color, attenuation, type, position, direction, angle);
+  if(angle_cstr != NULL){
+    std::string angle_str(reinterpret_cast<const char*>(angle_cstr));
+    angle = std::stof(angle_str);
+    entity_manager.addLightAngleComponent(entity,
+        {
+          angle
+        }
+    );
+  }
 
-  // Free the attribute values
-  xmlFree(att_cstr);
-  xmlFree(angle_cstr);
-  xmlFree(att_t_cstr);
-
-  return spot_light;
-
-}
-
-std::shared_ptr<Light> create_pointlight_entity(xmlNodePtr& node){
-  */
-  /*<point_light attenuation="1" attenuation_type="linear">
-    <vec3 name="color" x="1" y="1" z="1"></vec3>
-    <vec3 name="position" x="0" y="0" z="-10"></vec3>
-  </point_light>*/
-    /*
-
-  float attenuation;
-  std::string atteuation_type;
-  glm::vec3 color, position;
-  for (xmlNodePtr cur = node->children; cur != NULL; cur = cur->next) {
-    if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "color")) {
-      color = load_vec3(cur);
+  LightAttenuationType type = LightAttenuationType::Constant;
+  if(att_cstr != nullptr){
+    std::string att(reinterpret_cast<const char*>(att_t_cstr));
+    if(att_t == "constant"){
+      type = LightAttenuationType::Constant;
     }
-    if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "position")) {
-      position = load_vec3(cur);
+    else if(att_t == "linear"){
+      type = LightAttenuationType::Linear;
+    }
+    else{
+      type = LightAttenuationType::Quadratic;
     }
   }
 
-  xmlChar *att_cstr = xmlGetProp(node, BAD_CAST "attenuation");
-  xmlChar *att_t_cstr = xmlGetProp(node, BAD_CAST "attenuation_type");
-
-  // Convert xmlChar* to std::string
-  std::string att(reinterpret_cast<const char*>(att_cstr));
-  std::string att_t(reinterpret_cast<const char*>(att_t_cstr));
-
-  // Convert string to float
-  attenuation = std::stof(att);  
-  LightAttenuationType type;
-  if(att_t == "constant"){
-    type = LightAttenuationType::Constant;
-  }
-  else if(att_t == "linear"){
-    type = LightAttenuationType::Linear;
-  }
-  else{
-    type = LightAttenuationType::Quadratic;
-  }
-
-  std::shared_ptr<PointLight> point_light = light_manager->addPointLight(
-                        color, attenuation, type, position);
-
-  // Free the attribute values
-  xmlFree(att_cstr);
-  xmlFree(att_t_cstr);
-
-  return point_light;
-
+  entity_manager.addLightComponent(entity,
+      {
+        color,
+        attenuation,
+        type
+      }
+  );
 }
 
-std::shared_ptr<Asset> create_asset_entity(xmlNodePtr& node){
-  std::shared_ptr<Asset> asset = std::make_shared<Asset>();
-  return asset;
-}
-
-std::shared_ptr<TransformComponent> create_transform(xmlNodePtr& node){
+void create_transform_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+  LOG(LL::Verbose, "Loading transform component.");
   // determine if its the 4 vec3 method or not.
   bool has_columns = false;
   std::shared_ptr<TransformComponent> transform_component = 
@@ -428,10 +326,8 @@ std::shared_ptr<TransformComponent> create_transform(xmlNodePtr& node){
       }
     }
     
-
     glm::mat4 transform(col1, col2, col3, col4);
-    transform_component->setTransform(transform);
-    return transform_component;
+    entity_manager.addTransformComponent(entity, {transform});
   }
   else{
 
@@ -463,26 +359,30 @@ std::shared_ptr<TransformComponent> create_transform(xmlNodePtr& node){
     }
 
     // set the transformation
+    glm::mat4 transform(1.0f);
     if(has_translate){
-      transform_component->translate(translate);
+      transform = glm::translate(transform, translate);
     }
     if(has_rotate){
-      transform_component->rotate(glm::vec3(rotate.x, rotate.y, rotate.z), rotate.w);
+      transform = glm::rotate(transform, glm::radians(rotate.w),
+          glm::normalize(glm::vec3(rotate.x, rotate.y, rotate.z)));
     }
     if(has_scale){
-      transform_component->scale(scale);
+      transform = glm::scale(transform, scale);
     }
-
-    return transform_component;
+    entity_manager.addTransformComponent(entity, {transform});
   }
 }
 
-std::shared_ptr<MeshComponent> create_mesh(xmlNodePtr& node){
+void create_mesh_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+  LOG(LL::Verbose, "Loading mesh component.");
   std::string filename = get_name(node); 
-  return MeshLoader::loadMeshComponent(filename);
+  LOG(LL::Verbose, "Mesh file: "+filename);
+  entity_manager.addMeshComponent(entity, MeshLoader::load(filename));
 }
 
-std::shared_ptr<ShaderComponent> create_shader(xmlNodePtr& node){
+void create_shader_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+  LOG(LL::Verbose, "Loading shader component.");
   xmlChar *vertex_cstr = xmlGetProp(node, BAD_CAST "vertex");
   xmlChar *fragment_cstr = xmlGetProp(node, BAD_CAST "fragment");
 
@@ -493,7 +393,7 @@ std::shared_ptr<ShaderComponent> create_shader(xmlNodePtr& node){
   xmlFree(fragment_cstr);
   xmlFree(vertex_cstr);
 
-  return ShaderLoader::loadShaderComponent(vertex_str, fragment_str);
+  entity_manager.addShaderComponent(entity, ShaderLoader::load(vertex_str, fragment_str));
 }
 
 glm::vec3 load_vec3(xmlNodePtr& node){
@@ -557,18 +457,21 @@ glm::vec4 load_vec4(xmlNodePtr& node){
   return out;
 }
 
-bool is_named(xmlNodePtr& node, std::string name){
+/*bool is_named(xmlNodePtr& node, std::string name){
   return get_name(node) == name;
-}
+}*/
 
 std::string get_name(xmlNodePtr& node){
   xmlChar *name_cstr = xmlGetProp(node, BAD_CAST "name");
+  if(name_cstr == NULL){
+    LOG(LL::Warn, "Warning, mesh file name not found");
+    return "";
+  }
   std::string name_str(reinterpret_cast<const char*>(name_cstr));
   xmlFree(name_cstr);
   return name_str;
 }
 
-*/
-void SceneLoader::load(Scene& scene, std::string filename){
+void SceneLoader::free(Scene& scene, std::string filename){
 
-}
+};

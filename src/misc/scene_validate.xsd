@@ -80,7 +80,7 @@
           <xs:complexType>
             <xs:sequence>
               <xs:element name="color" type="vec3Type" minOccurs="1" maxOccurs="1"/>
-              <xs:element name="position" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="position" type="vec3Type" minOccurs="0" maxOccurs="1"/>
               <xs:element name="direction" type="vec3Type" minOccurs="0" maxOccurs="1"/>
               <xs:element name="transformation" type="transformationType" minOccurs="0" maxOccurs="1"/>
             </xs:sequence>

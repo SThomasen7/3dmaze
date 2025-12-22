@@ -1,5 +1,6 @@
 #include "shader_loader.h"
 #include "opengl_headers.h"
+#include "consts.h"
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -23,7 +24,7 @@ ShaderComponent ShaderLoader::load(
 
 // Util functions
 std::string read_shader_file(std::string filename){
-  std::ifstream t(filename);
+  std::ifstream t(asset_path+std::string("shaders/")+filename);
   if (!t.is_open()) {
     LOG(LL::Error, "File: ", filename, " could not be opened!");
     return "";

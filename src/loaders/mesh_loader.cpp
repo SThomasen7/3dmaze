@@ -5,6 +5,7 @@
 #include <assimp/scene.h> // Output data structure
 #include <stdexcept>
                           
+#include "consts.h"
 #include "logger.h"
 
 void load_triangle_meshes(MeshComponent& mesh, std::string filename);
@@ -12,7 +13,9 @@ Mesh load_triangle_mesh(aiMesh* mesh);
 
 MeshComponent MeshLoader::load(std::string filename){
   MeshComponent mesh;
-  load_triangle_meshes(mesh, filename);
+  LOG(LL::Verbose, "Loading mesh: ");
+  LOG(LL::Verbose, asset_path+std::string("obj/")+filename);
+  load_triangle_meshes(mesh, asset_path+std::string("obj/")+filename);
   return mesh;
 }
 

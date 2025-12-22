@@ -60,22 +60,22 @@ target_include_directories(MazeTestLib PUBLIC
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-# find_package(LibXml2 REQUIRED)
+find_package(LibXml2 REQUIRED)
 find_package(assimp REQUIRED)
-# find_package(PkgConfig REQUIRED)
+#find_package(PkgConfig REQUIRED)
 
-# pkg_check_modules(LIBXML++ REQUIRED libxml++-2.6)
+pkg_check_modules(LIBXML++ REQUIRED libxml++-2.6)
 
-# target_include_directories(SpectrumRendererLibrary PUBLIC
-# ${LIBXML++_INCLUDE_DIRS}
-# )
+target_include_directories(MazeLib PUBLIC
+  ${LIBXML++_INCLUDE_DIRS}
+)
 
 # Link external libraries
 target_link_libraries(MazeLib PRIVATE 
   OpenGL::GL 
   glfw 
   GLEW::GLEW
-# ${LIBXML++_LIBRARIES}
+  ${LIBXML++_LIBRARIES}
   assimp
 )
 
