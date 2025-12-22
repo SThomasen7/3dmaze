@@ -12,7 +12,7 @@ GLuint create_program(std::string vertex, std::string fragment);
 bool compile_shader(GLuint& shader, std::string filename, std::string &shader_code);
 
 // Shader Loader class functions
-ShaderComponent ShaderLoader::loadShaderComponent(
+ShaderComponent ShaderLoader::load(
     std::string vertex_name, std::string fragment_name){
 
   ShaderComponent shader;

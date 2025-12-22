@@ -6,7 +6,7 @@ find_program(CTAGS_EXECUTABLE ctags)
 
 if (CTAGS_EXECUTABLE)
     add_custom_target(tags
-        COMMAND ${CTAGS_EXECUTABLE} -R . --exclude=third_party --languages=C,C++
+        COMMAND ${CTAGS_EXECUTABLE} -R src 
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Generating ctags"
     )
