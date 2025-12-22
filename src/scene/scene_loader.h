@@ -2,6 +2,7 @@
 #define _SCENE_LOADER_H_ 1
 
 #include "scene.h"
+#include "entity_manager.h"
 #include <string>
 
 class SceneLoader{

@@ -2,7 +2,7 @@
 #define _SHADER_COMPONENT_H_ 1
 #include "opengl_headers.h"
 
-struct Shader{
+struct ShaderComponent{
   GLuint program;
 };
 

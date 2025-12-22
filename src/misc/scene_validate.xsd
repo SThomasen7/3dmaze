@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- Define reusable mesh type -->
+  <xs:complexType name="meshType">
+    <xs:attribute name="name" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Define reusable shader type -->
+  <xs:complexType name="shaderType">
+    <xs:attribute name="vertex" type="xs:string" use="required"/>
+    <xs:attribute name="fragment" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Define reusable vec3 type -->
+  <xs:complexType name="vec3Type">
+    <xs:attribute name="name" type="xs:string" use="optional"/>
+    <xs:attribute name="x" type="xs:float" use="required"/>
+    <xs:attribute name="y" type="xs:float" use="required"/>
+    <xs:attribute name="z" type="xs:float" use="required"/>
+  </xs:complexType>
+
+  <!-- Define reusable vec4 type -->
+  <xs:complexType name="vec4Type">
+    <xs:attribute name="name" type="xs:string" use="optional"/>
+    <xs:attribute name="x" type="xs:float" use="required"/>
+    <xs:attribute name="y" type="xs:float" use="required"/>
+    <xs:attribute name="z" type="xs:float" use="required"/>
+    <xs:attribute name="w" type="xs:float" use="required"/>
+  </xs:complexType>
+
+  <!-- Define a reusable complex type for transformation -->
+  <xs:complexType name="transformationType">
+    <xs:choice>
+      <!-- Option 1: 4 vec4 elements -->
+      <xs:sequence>
+        <xs:element name="col1" type="vec4Type" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="col2" type="vec4Type" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="col3" type="vec4Type" minOccurs="1" maxOccurs="1"/>
+        <xs:element name="col4" type="vec4Type" minOccurs="1" maxOccurs="1"/>
+      </xs:sequence>
+      <!-- Option 2: rotate, scale, translate -->
+      <xs:sequence>
+        <xs:element name="rotate" type="vec4Type" minOccurs="0" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>Rotation defined by axis (x, y, z) and angle (w).</xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="scale" type="vec3Type" minOccurs="0" maxOccurs="1"/>
+        <xs:element name="translate" type="vec3Type" minOccurs="0" maxOccurs="1"/>
+      </xs:sequence>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- Root element: scene -->
+  <xs:element name="scene">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Entities inside scene -->
+        <xs:element name="camera" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <!-- Use the reusable type for transformation -->
+              <xs:element name="up" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="lookat" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="position" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="transformation" type="transformationType" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="fov" type="xs:float" use="required"/>
+            <xs:attribute name="buffer_x" type="xs:float" use="required"/>
+            <xs:attribute name="buffer_y" type="xs:float" use="required"/>
+            <xs:attribute name="z_near" type="xs:float" use="required"/>
+            <xs:attribute name="z_far" type="xs:float" use="required"/>
+            <xs:attribute name="projection_type" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="light" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="color" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="position" type="vec3Type" minOccurs="1" maxOccurs="1"/>
+              <xs:element name="direction" type="vec3Type" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="transformation" type="transformationType" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="attenuation" type="xs:float" use="optional"/>
+            <xs:attribute name="attenuation_type" type="xs:string" use="optional"/>
+            <xs:attribute name="angle" type="xs:float" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="asset" minOccurs="0" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <!-- Asset can contain other entities -->
+              <xs:element name="camera" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="spot_light" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="directional_light" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="point_light" minOccurs="0" maxOccurs="unbounded"/>
+
+              <!-- Asset can have transformation and mesh components -->
+              <xs:element name="transformation" type="transformationType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="mesh" type="meshType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="shader" type="shaderType" minOccurs="0" maxOccurs="1"/>
+
+              <!-- Assets can also have nested assets -->
+              <xs:element name="asset" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>
+

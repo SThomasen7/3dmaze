@@ -101,8 +101,8 @@ GLuint create_program(std::string vertex, std::string frag) {
   if (!success) {
     glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
     CHECK_OGL_ERROR();
-    LOG(LL::Error, "ERROR::SHADER::LINK: (", shader.vertex_shader,
-        ", ", shader.fragment_shader, ") :", infoLog);
+    LOG(LL::Error, "ERROR::SHADER::LINK: (", vertex,
+        ", ", frag, ") :", infoLog);
     return 0;
   }
   return shaderProgram;

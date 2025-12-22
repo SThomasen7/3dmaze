@@ -1,6 +1,8 @@
 #ifndef _MESH_COMPONENT_H_
 #define _MESH_COMPONENT_H_ 1
 
+#include <cstddef>
+
 struct Mesh{
   float* vertex;
   float* normal;
@@ -22,7 +24,7 @@ struct MeshComponent{
   Mesh* meshes;
   size_t mesh_count;
 
-}
+};
 
 
 #endif

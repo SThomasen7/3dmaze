@@ -16,37 +16,43 @@ MeshComponent MeshLoader::load(std::string filename){
   return mesh;
 }
 
-void MeshLoader::free(MeshComponent& mesh){
+void MeshLoader::free(MeshComponent& mesh_component){
   // Free the buffer data
-  if(mesh.index != nullptr){
-    delete[] mesh.index;
-    mesh.index = nullptr;
-    mesh.index_count = 0;
+  for(size_t i = 0; i < mesh_component.mesh_count; i++){
+    Mesh& mesh = mesh_component.meshes[i];
+  
+    if(mesh.index != nullptr){
+      delete[] mesh.index;
+      mesh.index = nullptr;
+      mesh.index_count = 0;
+    }
+    if(mesh.vertex != nullptr){
+      delete[] mesh.vertex;
+      mesh.vertex = nullptr;
+      mesh.vertex_count = 0;
+    }
+    if(mesh.normal != nullptr){
+      delete[] mesh.normal;
+      mesh.normal = nullptr;
+    }
+    if(mesh.tex != nullptr){
+      delete[] mesh.tex;
+      mesh.tex = nullptr;
+    }
+    if(mesh.tangent != nullptr){
+      delete[] mesh.tangent;
+      mesh.tangent = nullptr;
+    }
+    if(mesh.bittangent != nullptr){
+      delete[] mesh.bittangent;
+      mesh.bittangent = nullptr;
+    }
   }
-  if(mesh.vertex != nullptr){
-    delete[] mesh.vertex;
-    mesh.vertex = nullptr;
-    mesh.vertex_count = 0;
-  }
-  if(mesh.normal != nullptr){
-    delete[] mesh.normal;
-    mesh.normal = nullptr;
-  }
-  if(mesh.tex != nullptr){
-    delete[] mesh.tex;
-    mesh.tex = nullptr;
-  }
-  if(mesh.tangent != nullptr){
-    delete[] mesh.tangent;
-    mesh.tangent = nullptr;
-  }
-  if(mesh.bittangent != nullptr){
-    delete[] mesh.bittangent;
-    mesh.bittangent = nullptr;
-  }
+  delete[] mesh_component.meshes;
+  mesh_component.mesh_count = 0;
 }
 
-void load_triangle_meshes(MeshComponenet& mesh, std::string filename){
+void load_triangle_meshes(MeshComponent& mesh, std::string filename){
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(filename,
                     aiProcess_Triangulate | 
@@ -78,7 +84,7 @@ void load_triangle_meshes(MeshComponenet& mesh, std::string filename){
 Mesh load_triangle_mesh(aiMesh* mesh){
   Mesh out_mesh;
   out_mesh.has_normals = mesh->HasNormals();
-  out_mesh.has_uv = mesh->HasTextCoords(0);
+  out_mesh.has_uv = mesh->HasTextureCoords(0);
 
   const size_t floats_per_vert = 3;
   out_mesh.vertex = new float[mesh->mNumVertices * floats_per_vert];
@@ -104,7 +110,7 @@ Mesh load_triangle_mesh(aiMesh* mesh){
     out_mesh.vertex[(vert_idx * floats_per_vert) + 2] = vec.z;
 
     // Copy the normal data
-    if(mesh_config.has_normals){
+    if(out_mesh.has_normals){
       // Set normals
       aiVector3D &vec = mesh->mNormals[vert_idx];
       out_mesh.normal[(vert_idx * 3) + 0] = vec.x;
@@ -125,7 +131,7 @@ Mesh load_triangle_mesh(aiMesh* mesh){
     }
     
     // Copy the texture coord data
-    if(mesh_config.has_uv){
+    if(out_mesh.has_uv){
       aiVector3D &vec = mesh->mTextureCoords[0][vert_idx];
       out_mesh.tex[(vert_idx * 2) + 0] = vec.x;
       out_mesh.tex[(vert_idx * 2) + 1] = vec.y;

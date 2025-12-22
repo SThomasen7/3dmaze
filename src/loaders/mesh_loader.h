@@ -14,7 +14,7 @@ public:
 private:
   MeshLoader() { }
 
-}
+};
 
 
 #endif 
