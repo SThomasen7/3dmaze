@@ -15,16 +15,18 @@ void Engine::execute(){
   // Init systems
   render_system.init();
 
+  render_system.preLoadScene(scene);
   while(!settings.should_close){
     window_manager.pollEvents(settings);
     window_manager.preRender();
 
-    render_system.process();
+    render_system.process(scene);
 
     window_manager.postRender();
   }
 
   // Shutdown systems
+  render_system.clearScene(scene);
   render_system.shutdown();
 
 }

@@ -1,7 +1,7 @@
 #include "scene.h"
 #include "logger.h"
 
-Scene::Scene(){ }
+Scene::Scene(){ active_camera = nullptr; }
 
 EntityManager& Scene::getEntityManager(){
   return entity_manager;
@@ -11,4 +11,5 @@ EntityManager& Scene::getEntityManager(){
 void Scene::clear(){
   LOG(LL::Info, "Clearing the scene");
   entity_manager.clear();
+  active_camera = nullptr;
 }

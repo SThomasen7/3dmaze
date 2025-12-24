@@ -89,6 +89,12 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
           break;
         }
       }
+      else if(arg_type_id == std::type_index(typeid(RenderComponent))){
+        if(!render_pool.contains(entity)){
+          found = false;
+          break;
+        }
+      }
 
     }
     if(found){
@@ -230,5 +236,18 @@ CameraComponent& EntityManager::getCamera(Entity& entity){
 
 CameraComponent EntityManager::getCamera(const Entity& entity) const{
   return camera_pool.at(entity);
+}
+
+void EntityManager::addRenderComponent(
+    const Entity& entity, RenderComponent render){
+  render_pool[entity] = render;
+}
+
+RenderComponent& EntityManager::getRender(Entity& entity){
+  return render_pool.at(entity);
+}
+
+RenderComponent EntityManager::getRender(const Entity& entity) const{
+  return render_pool.at(entity);
 }
 
