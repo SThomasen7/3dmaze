@@ -23,12 +23,26 @@ void RenderSystem::process(Scene& scene){
   EntityManager& entity_manager = scene.getEntityManager();
 
   // TODO add error handling and logging.
-  if(scene.active_camera == nullptr){
+  if(scene.active_camera == -1){
     LOG(LL::Error, "No active camera found! Skipping rendering...");
     return;
   }
-  CameraComponent camera_component = entity_manager.getCamera(*(scene.active_camera));
-  PositionComponent camera_pos_component = entity_manager.getPosition(*(scene.active_camera));
+  
+  int camera_idx = 0;
+  using EntityView = EntityManager::EntityView;
+  EntityView* eview = 
+    entity_manager.createEntityView<CameraComponent>();
+
+  CameraComponent camera_component;
+  PositionComponent camera_pos_component;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    if(camera_idx == scene.active_camera){
+      camera_component = entity_manager.getCamera(*entity_ptr);
+      camera_pos_component = entity_manager.getPosition(*entity_ptr);
+      break;
+    }
+  }
+  entity_manager.destroyEntityView(&eview);
 
   // Calculate the camera transformation
   glm::mat4 mvp(1.0f);
@@ -61,8 +75,7 @@ void RenderSystem::process(Scene& scene){
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   // Create the view
-  using EntityView = EntityManager::EntityView;
-  EntityView* eview = 
+  eview = 
     entity_manager.createEntityView<RenderComponent, ShaderComponent, TransformComponent>();
 
   LOG(LL::Verbose, "Starting render..");
@@ -104,6 +117,7 @@ void RenderSystem::process(Scene& scene){
       glBindVertexArray(0);
     }
   }
+  entity_manager.destroyEntityView(&eview);
 }
 
 void RenderSystem::shutdown(){
@@ -124,7 +138,9 @@ void RenderSystem::preLoadScene(Scene& scene){
   for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
     MeshComponent mesh = entity_manager.getMesh(*entity_ptr);
     RenderComponent render = create_render_component(mesh);
+    entity_manager.addRenderComponent(*entity_ptr, render);
   }
+  entity_manager.destroyEntityView(&eview);
 
 }
 

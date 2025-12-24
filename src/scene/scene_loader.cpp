@@ -83,15 +83,17 @@ void SceneLoader::load(Scene& scene, std::string filename){
   create_scene_nodes(entity_manager, root);
 
   // The first camera is the active camera
-  using EntityView = EntityManager::EntityView;
+  /*using EntityView = EntityManager::EntityView;
   EntityView* eview = 
-    entity_manager.createEntityView<CameraComponent>();
+    entity_manager.createEntityView<CameraComponent>();*/
 
-  // Get the entities with mesh components and get the mesh data
-  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
-    scene.active_camera = &(*entity_ptr);
+  // TODO check that there is a zeroth active camera.
+  scene.active_camera = 0;
+  /*for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    scene.active_camera = *entity_ptr;
     break;
   }
+  entity_manager.destroyEntityView(&eview);*/
 
   // Cleanup
   xmlFreeDoc(doc);

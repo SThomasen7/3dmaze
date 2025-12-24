@@ -12,7 +12,7 @@ public:
   EntityManager& getEntityManager();
   void clear();
 
-  Entity* active_camera;
+  int active_camera;
 
 private:
 

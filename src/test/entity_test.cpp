@@ -188,10 +188,152 @@ MAKE_TEST(EntityTypesTest){
 
 }
 
+MAKE_TEST(EntityTypesTest2){
+  TEST_START();
+
+  EntityManager entity_manager;
+  entity_manager.clear();
+  Entity entity = entity_manager.createEntity();
+  Entity entity2 = entity_manager.createEntity();
+
+  entity_manager.addPositionComponent(entity, {});
+  entity_manager.addTransformComponent(entity, {});
+  entity_manager.addShaderComponent(entity, {});
+  entity_manager.addMeshComponent(entity, {});
+  entity_manager.addLightComponent(entity, {});
+  entity_manager.addLightDirectionComponent(entity, {});
+  entity_manager.addLightAngleComponent(entity, {});
+  entity_manager.addCameraComponent(entity, {});
+  entity_manager.addRenderComponent(entity, {});
+
+  // Check position component
+  using EntityView = EntityManager::EntityView;
+  EntityView* eview = 
+    entity_manager.createEntityView<PositionComponent>();
+  size_t count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check transform component
+  eview = entity_manager.createEntityView<TransformComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check shader component
+  eview = entity_manager.createEntityView<ShaderComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check mesh component
+  eview = entity_manager.createEntityView<MeshComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check light component
+  eview = entity_manager.createEntityView<LightComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check light direction component
+  eview = entity_manager.createEntityView<LightDirectionComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check light angle component
+  eview = entity_manager.createEntityView<LightAngleComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check camera component
+  eview = entity_manager.createEntityView<CameraComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+
+  // check render component
+  eview = entity_manager.createEntityView<RenderComponent>();
+  count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+}
+
+MAKE_TEST(EntityTypesTest3){
+  TEST_START();
+
+  EntityManager entity_manager;
+  entity_manager.clear();
+  Entity entity = entity_manager.createEntity();
+
+  entity_manager.addPositionComponent(entity, {});
+  entity_manager.addTransformComponent(entity, {});
+  entity_manager.addShaderComponent(entity, {});
+  entity_manager.addMeshComponent(entity, {});
+  entity_manager.addLightComponent(entity, {});
+  entity_manager.addLightDirectionComponent(entity, {});
+  entity_manager.addLightAngleComponent(entity, {});
+  entity_manager.addCameraComponent(entity, {});
+  entity_manager.addRenderComponent(entity, {});
+
+  // Check position component
+  using EntityView = EntityManager::EntityView;
+  EntityView* eview = 
+    entity_manager.createEntityView<
+      PositionComponent, 
+      TransformComponent,
+      ShaderComponent,
+      LightComponent,
+      LightDirectionComponent,
+      LightAngleComponent,
+      CameraComponent,
+      RenderComponent>();
+  size_t count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    count++;
+  }
+  CHECK_EQ(count, 1);
+  entity_manager.destroyEntityView(&eview);
+}
+
 void set_entity_tests(){
   TEST(EntityTestSuite, InitTest);
   TEST(EntityManagerSuite, BasicIterationTest);
   TEST(EntityManagerSuite, PositionComponentTest);
   TEST(EntityManagerSuite, ViewListTest);
   TEST(EntityManagerSuite, EntityTypesTest);
+  TEST(EntityManagerSuite, EntityTypesTest2);
+  TEST(EntityManagerSuite, EntityTypesTest3);
 }
+
