@@ -78,10 +78,10 @@ void RenderSystem::process(Scene& scene){
   eview = 
     entity_manager.createEntityView<RenderComponent, ShaderComponent, TransformComponent>();
 
-  LOG(LL::Verbose, "Starting render..");
+  //LOG(LL::Verbose, "Starting render..");
   // Get the entities with mesh components and get the mesh data
   for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
-    LOG(LL::Verbose, "Rendering mesh!");
+    //LOG(LL::Verbose, "Rendering mesh!");
     RenderComponent render_c = entity_manager.getRender(*entity_ptr);
     ShaderComponent shader_c = entity_manager.getShader(*entity_ptr);
     TransformComponent transform_c = entity_manager.getTransform(*entity_ptr);
