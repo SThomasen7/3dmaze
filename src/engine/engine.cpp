@@ -14,9 +14,11 @@ void Engine::execute(){
 
   // Init systems
   render_system.init();
+  input_system.init();
 
   render_system.preLoadScene(scene);
   while(!settings.should_close){
+    input_system.pollEvents(settings);
     window_manager.pollEvents(settings);
     window_manager.preRender();
 
@@ -27,6 +29,7 @@ void Engine::execute(){
 
   // Shutdown systems
   render_system.clearScene(scene);
+  input_system.shutdown();
   render_system.shutdown();
 
 }
