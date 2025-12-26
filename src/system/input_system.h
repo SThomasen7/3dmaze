@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 
 
-class InputSystem public System{
+class InputSystem : public System{
 
 public:
   InputSystem() { window_should_close = false; };
