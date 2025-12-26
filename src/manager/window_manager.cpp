@@ -93,9 +93,9 @@ void WindowManager::bufferResize(int width, int height){
   glViewport(0, 0, width, height);
 }
 
-/*GLFWwindow* WindowManager::getWindow(){
+GLFWwindow* WindowManager::getWindow(){
   return window;
-}*/
+}
 
 /*void WindowManager::handleScreenResizeEvent(const ResizeScreenEvent &event){
   bufferResize(event.buffer_x, event.buffer_y);

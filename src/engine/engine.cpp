@@ -14,6 +14,7 @@ void Engine::execute(){
 
   // Init systems
   render_system.init();
+  input_system.setupWindow(window_manager);
   input_system.init();
 
   render_system.preLoadScene(scene);

@@ -3,6 +3,7 @@
 
 #include "system.h"
 #include "application_settings.h"
+#include "window_manager.h"
 #include <GL/glew.h> 
 #include <GLFW/glfw3.h>
 
@@ -17,9 +18,11 @@ public:
   void shutdown() override;
 
   void pollEvents(ApplicationSettings& settings);
+  void setupWindow(WindowManager& window_manager);
 
 private:
   bool window_should_close;
+  WindowManager& window_manager;
 
 };
 

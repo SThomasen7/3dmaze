@@ -23,7 +23,7 @@ public:
   void preRender();
   void postRender();
   void bufferResize(int width, int height);
-  //GLFWwindow* getWindow();
+  GLFWwindow* getWindow();
 
 private:
   //void handleScreenResizeEvent(const ResizeScreenEvent &event);
