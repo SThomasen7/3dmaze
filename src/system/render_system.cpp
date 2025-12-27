@@ -45,7 +45,7 @@ void RenderSystem::process(Scene& scene){
   entity_manager.destroyEntityView(&eview);
 
   // Calculate the camera transformation
-  glm::mat4 mvp(1.0f);
+  glm::mat4 vp(1.0f);
   glm::mat4 projection(1.0f);
   glm::mat4 view(1.0f);
 
@@ -68,7 +68,7 @@ void RenderSystem::process(Scene& scene){
       camera_component.up);
 
   // Calculate and return the transformation
-	mvp = projection * view;
+	vp = projection * view;
 
   // set the base color
   glClearColor(0.10f, 0.15f, 0.30f, 1.00f);
@@ -97,7 +97,7 @@ void RenderSystem::process(Scene& scene){
 
     // calculate the transform and set
     glm::mat4 asset_mvp;
-    asset_mvp = mvp * transform_c.transformation;
+    asset_mvp = vp * transform_c.transformation;
 
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(asset_mvp));
     CHECK_OGL_ERROR();
@@ -127,6 +127,14 @@ void RenderSystem::shutdown(){
 
 void RenderSystem::preLoadScene(Scene& scene){
   
+  // TODO find a better place for these
+  glEnable(GL_DEPTH_TEST);
+  glDepthFunc(GL_LESS);
+
+  glEnable(GL_CULL_FACE);
+  glCullFace(GL_BACK);
+  glFrontFace(GL_CCW);
+
   EntityManager& entity_manager = scene.getEntityManager();
 
   // Create the view
@@ -319,6 +327,6 @@ void destroy_render_component(RenderComponent& render){
     delete[] render.index_count;
 
   }
-
-
 }
+
+

@@ -5,6 +5,7 @@
 #include "window_manager.h"
 #include "render_system.h"
 #include "input_system.h"
+#include "physics_system.h"
 #include "application_settings.h"
 #include "scene.h"
 #include <string>
@@ -31,6 +32,7 @@ private:
   // Systems -- only these should touch the scene
   RenderSystem render_system;
   InputSystem input_system;
+  PhysicsSystem physics_system;
 
   // Settings
   ApplicationSettings settings;

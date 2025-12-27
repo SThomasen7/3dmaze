@@ -22,6 +22,7 @@ public:
 
 private:
   WindowManager* window_manager;
+  double mouse_xpos, mouse_ypos;
 
 };
 

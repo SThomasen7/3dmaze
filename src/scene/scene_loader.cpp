@@ -147,7 +147,7 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
   float buffer_x, buffer_y;
   float z_near, z_far;
   std::string projection_type;
-  glm::vec3 up, lookat, position;
+  glm::vec3 up, lookat, position = glm::vec3(0.0f);
 
   // get the children nodes
   for (xmlNodePtr cur = node->children; cur != NULL; cur = cur->next) {
@@ -155,12 +155,14 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
       up = glm::normalize(load_vec3(cur));
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "lookat")) {
-      lookat = glm::normalize(load_vec3(cur));
+      lookat = load_vec3(cur);
     }
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "position")) {
       position = load_vec3(cur);
     }
   }
+
+  lookat = glm::normalize(position - lookat);
 
   xmlChar *fov_cstr = xmlGetProp(node, BAD_CAST "fov");
   xmlChar *buffer_x_cstr = xmlGetProp(node, BAD_CAST "buffer_x");

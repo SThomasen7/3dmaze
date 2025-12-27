@@ -28,33 +28,35 @@ void PhysicsSystem::resolve_camera_movements(Scene& scene){
       CameraMovementQueueComponent
     >();
 
-  glm::vec3 resolved_position(0.0f);
-  glm::vec2 resolved_pan(0.0f);
   for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
     
     CameraMovementQueueComponent& component = entity_manager.getCameraMovementQueue(*entity_ptr);
+
+    if(component.movements.size() == 0){
+      continue;
+    }
+
     for(size_t i = 0; i < component.movements.size(); i++){
-      resolved_position += component.movements[i];
-      resolved_pan += component.pans[i];
+      CameraComponent& camera_component = entity_manager.getCamera(*entity_ptr);
+      PositionComponent& pos_component = entity_manager.getPosition(*entity_ptr);
+      glm::vec3 displace = glm::mat3(camera_component.lookat, camera_component.up,
+            camera_component.right) * component.movements[i];
+      pos_component.position += displace;
+      LOG(LL::Verbose, "Moving camera delta: (", displace.x, " ", displace.y,
+          " ", displace.z, ")");
+
+      rotate_camera_x_y(camera_component, component.pans[i].x, component.pans[i].y);
+      LOG(LL::Verbose, "Moving camera new position: (", pos_component.position.x, 
+       " ", pos_component.position.y, " ", pos_component.position.z, ")");
+
+      // Update the up, lookat, and right vectors
+      LOG(LL::Verbose, "panning camera delta: (", component.pans[i].x, " ", 
+          component.pans[i].y, ")");
     }
 
     // Clear out the requested movements
     component.movements.clear();
     component.pans.clear();
-
-    // update the position component
-    PositionComponent& pos_component = entity_manager.getPosition(*entity_ptr);
-    LOG(LL::Verbose, "Moving camera delta: (", resolved_position.x, " ", resolved_position.y,
-        " ", resolved_position.z, ")");
-    pos_component.position += resolved_position;
-    LOG(LL::Verbose, "Moving camera new position: (", pos_component.position.x, 
-        " ", pos_component.position.y, " ", pos_component.position.z, ")");
-
-    // Update the up, lookat, and right vectors
-    CameraComponent& camera_component = entity_manager.getCamera(*entity_ptr);
-    LOG(LL::Verbose, "panning camera delta: (", resolved_pan.x, " ", resolved_pan.y, ")");
-    rotate_camera_x_y(camera_component, resolved_pan.x, resolved_pan.y);
-
   }
   entity_manager.destroyEntityView(&eview);
 }

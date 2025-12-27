@@ -3,7 +3,7 @@
 #include "logger.h"
 
 int main(void){
-  //LOGGER.setLogLevel(LL::Verbose);
+  LOGGER.setLogLevel(LL::Verbose);
   Engine engine;
 
   engine.init();
