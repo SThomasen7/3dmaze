@@ -11,7 +11,7 @@
 class InputSystem : public System{
 
 public:
-  InputSystem() { window_should_close = false; };
+  InputSystem() { window_manager = nullptr; };
 
   void init() override;
   void process(Scene& scene) override;
@@ -21,8 +21,7 @@ public:
   void setupWindow(WindowManager& window_manager);
 
 private:
-  bool window_should_close;
-  WindowManager& window_manager;
+  WindowManager* window_manager;
 
 };
 

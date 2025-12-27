@@ -14,6 +14,7 @@
 #include "light_angle_component.h"
 #include "camera_component.h"
 #include "render_component.h"
+#include "camera_movement_queue_component.h"
 
 class EntityManager{
 
@@ -81,6 +82,10 @@ public:
   RenderComponent& getRender(Entity& entity);
   RenderComponent getRender(const Entity& entity) const;
 
+  void addCameraMovementQueueComponent(const Entity& entity, CameraMovementQueueComponent cqueue);
+  CameraMovementQueueComponent& getCameraMovementQueue(Entity& entity);
+  CameraMovementQueueComponent getCameraMovementQueue(const Entity& entity) const;
+
   // Iterator functions
   iterator begin();
   iterator end();
@@ -112,6 +117,7 @@ private:
   ComponentPool<LightAngleComponent> light_angle_pool;
   ComponentPool<CameraComponent> camera_pool;
   ComponentPool<RenderComponent> render_pool;
+  ComponentPool<CameraMovementQueueComponent> camera_movement_queue_pool;
 
 };
 

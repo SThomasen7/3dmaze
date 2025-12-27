@@ -210,6 +210,8 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
       }
   );
 
+  entity_manager.addCameraMovementQueueComponent(entity, {});
+
   // Free the attribute values
   xmlFree(fov_cstr);
   xmlFree(buffer_x_cstr);

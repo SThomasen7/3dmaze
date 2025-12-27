@@ -251,3 +251,17 @@ RenderComponent EntityManager::getRender(const Entity& entity) const{
   return render_pool.at(entity);
 }
 
+
+void EntityManager::addCameraMovementQueueComponent(const Entity& entity, 
+    CameraMovementQueueComponent cqueue){
+  camera_movement_queue_pool[entity] = cqueue;
+}
+
+CameraMovementQueueComponent& EntityManager::getCameraMovementQueue(Entity& entity){
+  return camera_movement_queue_pool.at(entity);
+}
+
+CameraMovementQueueComponent EntityManager::getCameraMovementQueue(const Entity& entity) const{
+  return camera_movement_queue_pool.at(entity);
+}
+
