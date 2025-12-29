@@ -46,8 +46,8 @@ void InputSystem::process(Scene& scene){
   // Handle mouse motion
   double temp_mousex, temp_mousey;
   glfwGetCursorPos(window, &temp_mousex, &temp_mousey);
-  double delta_x, delta_y ;
-  delta_x = mouse_xpos - temp_mousex;
+  double delta_x, delta_y;
+  delta_x = -(mouse_xpos - temp_mousex);
   delta_y = mouse_ypos - temp_mousey;
   mouse_xpos = temp_mousex;
   mouse_ypos = temp_mousey;

@@ -19,6 +19,8 @@ struct CameraComponent{
   float buffer_x, buffer_y;
   float z_near, z_far;
 
+  float pitch, yaw, roll;
+
 };
 
 #endif

@@ -20,6 +20,7 @@
 #include <vector>
 #include <stdexcept>
 #include <iostream>
+#include <cmath>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/vec3.hpp>
@@ -162,7 +163,12 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
     }
   }
 
-  lookat = glm::normalize(position - lookat);
+  lookat = glm::normalize(lookat - position);
+
+  float yaw, pitch, roll = 0.0f;
+  pitch = glm::degrees(asin(lookat.y));
+  yaw = glm::degrees(atan2(lookat.z, lookat.x));
+
 
   xmlChar *fov_cstr = xmlGetProp(node, BAD_CAST "fov");
   xmlChar *buffer_x_cstr = xmlGetProp(node, BAD_CAST "buffer_x");
@@ -202,9 +208,16 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
         buffer_x,
         buffer_y,
         z_near,
-        z_far
+        z_far,
+        pitch, yaw, roll
       }
   );
+
+  LOG(LL::Verbose, "Camera information");
+  LOG(LL::Verbose, "Position: (", position.x, " ", position.y, " ", position.z, ")");
+  LOG(LL::Verbose, "Lookat: (", lookat.x, " ", lookat.y, " ", lookat.z, ")");
+  LOG(LL::Verbose, "up: (", up.x, " ", up.y, " ", up.z, ")");
+  LOG(LL::Verbose, "pitch, yaw, roll: (", pitch, " ", yaw, " ", roll, ")");
 
   entity_manager.addPositionComponent(entity,
       {
