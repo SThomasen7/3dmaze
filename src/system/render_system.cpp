@@ -18,7 +18,7 @@ void RenderSystem::init(){
   LOG(LL::Info, "Initializing Render System.");
 }
 
-void RenderSystem::process(Scene& scene){
+void RenderSystem::process(Scene& scene, float dt){
 
   EntityManager& entity_manager = scene.getEntityManager();
 

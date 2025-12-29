@@ -9,7 +9,7 @@ void PhysicsSystem::init(){
   LOG(LL::Info, "Initializing Physics System.");
 }
 
-void PhysicsSystem::process(Scene& scene){
+void PhysicsSystem::process(Scene& scene, float dt){
 
   resolve_camera_movements(scene);
 
@@ -21,7 +21,6 @@ void PhysicsSystem::shutdown(){
 
 void PhysicsSystem::resolve_camera_movements(Scene& scene){
   // Resolve camera movements, in the future check for bounding box collisions
-  float mouse_sensitivity = 0.1f;
   EntityManager& entity_manager = scene.getEntityManager();
   using EntityView = EntityManager::EntityView;
   EntityView* eview = entity_manager.createEntityView<
@@ -41,8 +40,8 @@ void PhysicsSystem::resolve_camera_movements(Scene& scene){
       CameraComponent& camera_component = entity_manager.getCamera(*entity_ptr);
       PositionComponent& pos_component = entity_manager.getPosition(*entity_ptr);
 
-      rotate_camera_x_y(camera_component, component.pans[i].x*mouse_sensitivity, 
-          component.pans[i].y*mouse_sensitivity);
+      rotate_camera_x_y(camera_component, component.pans[i].x, 
+          component.pans[i].y);
       LOG(LL::Verbose, "Moving camera new position: (", pos_component.position.x, 
        " ", pos_component.position.y, " ", pos_component.position.z, ")");
 
@@ -66,7 +65,6 @@ void PhysicsSystem::resolve_camera_movements(Scene& scene){
 }
 
 void PhysicsSystem::rotate_camera_x_y(CameraComponent& camera, float x, float y){
-  LOG(LL::Verbose, "Pitch, yaw: ", camera.pitch, " ", camera.yaw);
   x += camera.yaw;
   y += camera.pitch;
   if(y > 89.0f){
@@ -76,6 +74,11 @@ void PhysicsSystem::rotate_camera_x_y(CameraComponent& camera, float x, float y)
     y = -89.0f;
   }
 
+  glm::vec2 smoothed = glm::mix(glm::vec2(camera.yaw, camera.pitch),
+      glm::vec2(x, y), 0.25f);
+
+  x = smoothed.x;
+  y = smoothed.y;
   camera.yaw = x;
   camera.pitch = y;
   LOG(LL::Verbose, "Pitch, yaw (2): ", camera.pitch, " ", camera.yaw);

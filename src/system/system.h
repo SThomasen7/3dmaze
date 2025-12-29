@@ -9,7 +9,7 @@ public:
   System() {};
 
   virtual void init() = 0;
-  virtual void process(Scene& scene) = 0;
+  virtual void process(Scene& scene, float dt) = 0;
   virtual void shutdown() = 0;
 
 };

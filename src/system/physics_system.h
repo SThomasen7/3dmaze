@@ -12,7 +12,7 @@ public:
   PhysicsSystem() { }
 
   void init() override;
-  void process(Scene& scene) override;
+  void process(Scene& scene, float dt) override;
   void shutdown() override;
 
 private:

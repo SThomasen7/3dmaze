@@ -20,3 +20,4 @@ test
 maze
 test_output/
 tags
+__pycache__/
