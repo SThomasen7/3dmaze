@@ -7,10 +7,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 void InputSystem::init(){
   LOG(LL::Info, "Initializing Input System.");
   glfwSetWindowUserPointer(window_manager->getWindow(), this);
+  glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetKeyCallback(window_manager->getWindow(), key_callback);
   glfwGetCursorPos(window_manager->getWindow(), &mouse_xpos, &mouse_ypos);
-  glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPosCallback(window_manager->getWindow(), InputSystem::mouseCallback);
+  first_mouse = true;
 }
 
 void InputSystem::process(Scene& scene, float dt){
@@ -99,6 +100,12 @@ void InputSystem::mouseCallback(GLFWwindow* window, double temp_mousex, double t
   auto* self = static_cast<InputSystem*>(
         glfwGetWindowUserPointer(window)
   );
+  if(self->first_mouse){
+    self->mouse_xpos = temp_mousex; 
+    self->mouse_ypos = temp_mousey; 
+    self->first_mouse = false;
+    return;
+  }
   using EntityView = EntityManager::EntityView;
   EntityView* eview = self->entity_manager->createEntityView<
       CameraComponent, 

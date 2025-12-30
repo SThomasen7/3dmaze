@@ -25,6 +25,7 @@ private:
   WindowManager* window_manager;
   EntityManager* entity_manager;
   double mouse_xpos, mouse_ypos;
+  bool first_mouse;
 
   static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
 
