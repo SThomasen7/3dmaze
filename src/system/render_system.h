@@ -16,6 +16,7 @@ public:
 
   void preLoadScene(Scene& scene);
   void clearScene(Scene& scene);
+  void loadSceneLights(Scene& scene);
 
 };
 

@@ -41,7 +41,11 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
     for(auto arg_type_id : types){
 
       // Check that the entity has all of the component types specified
-      if(arg_type_id == std::type_index(typeid(PositionComponent))){
+      if(!hasEntityTypeImpl(entity, arg_type_id)){
+        found = false;
+        break;
+      }
+      /*if(arg_type_id == std::type_index(typeid(PositionComponent))){
         if(!position_pool.contains(entity)){
           found = false;
           break;
@@ -94,7 +98,7 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
           found = false;
           break;
         }
-      }
+      }*/
 
     }
     if(found){
@@ -104,6 +108,56 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
 
   EntityManager::EntityView* view_ptr = new EntityManager::EntityView(view_list);
   return view_ptr;
+}
+
+bool EntityManager::hasEntityTypeImpl(const Entity& entity, std::type_index type){
+  // Check that the entity has all of the component types specified
+  if(type == std::type_index(typeid(PositionComponent))){
+    if(!position_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(TransformComponent))){
+    if(!transform_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(ShaderComponent))){
+    if(!shader_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(MeshComponent))){
+    if(!mesh_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(LightComponent))){
+    if(!light_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(LightDirectionComponent))){
+    if(!light_direction_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(LightAngleComponent))){
+    if(!light_angle_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(CameraComponent))){
+    if(!camera_pool.contains(entity)){
+      return false;
+    }
+  }
+  else if(type == std::type_index(typeid(RenderComponent))){
+    if(!render_pool.contains(entity)){
+      return false;
+    }
+  }
+  return true;
 }
 
 void EntityManager::destroyEntityView(EntityManager::EntityView** entity_view){

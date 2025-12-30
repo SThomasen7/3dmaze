@@ -108,7 +108,7 @@ void RenderSystem::process(Scene& scene, float dt){
       CHECK_OGL_ERROR();
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_c.VIO[i]);
       CHECK_OGL_ERROR();
-      glBindBuffer(GL_ARRAY_BUFFER,render_c.VBO[i]);
+      glBindBuffer(GL_ARRAY_BUFFER, render_c.VBO[i]);
       CHECK_OGL_ERROR();
 
       glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(render_c.index_count[i]), 
@@ -330,3 +330,7 @@ void destroy_render_component(RenderComponent& render){
 }
 
 
+void RenderSystem::loadSceneLights(Scene& scene){
+
+
+}

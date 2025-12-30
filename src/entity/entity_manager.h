@@ -101,11 +101,17 @@ public:
       return createEntityViewImpl({ typeid(Components)... });
   }
 
+  template <typename Component>
+  bool hasEntityType(const Entity& entity){
+    return hasEntityTypeImpl(entity, typeid(Component));
+  }
+
   void destroyEntityView(EntityView** entity_view);
 
 private:
 
   EntityView* createEntityViewImpl(std::initializer_list<std::type_index> types);
+  bool hasEntityTypeImpl(const Entity& entity, std::type_index type);
 
   std::vector<Entity> entity_list;
   ComponentPool<PositionComponent> position_pool;
