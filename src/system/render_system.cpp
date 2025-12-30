@@ -8,6 +8,16 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+struct LightDataRaw{
+  glm::vec3 position; float angle;
+  glm::vec3 direction; float attenuation;
+  glm::vec3 color; float _;
+  int attenuation_type;
+  int active;
+  glm::vec2 _padding;
+};
+
+const int MAX_LIGHTS = 16;
 
 RenderSystem::RenderSystem(){ }
 
@@ -45,7 +55,7 @@ void RenderSystem::process(Scene& scene, float dt){
   entity_manager.destroyEntityView(&eview);
 
   // Calculate the camera transformation
-  glm::mat4 vp(1.0f);
+  //glm::mat4 vp(1.0f);
   glm::mat4 projection(1.0f);
   glm::mat4 view(1.0f);
 
@@ -68,7 +78,7 @@ void RenderSystem::process(Scene& scene, float dt){
       camera_component.up);
 
   // Calculate and return the transformation
-	vp = projection * view;
+	//vp = projection * view;
 
   // set the base color
   glClearColor(0.10f, 0.15f, 0.30f, 1.00f);
@@ -92,16 +102,31 @@ void RenderSystem::process(Scene& scene, float dt){
     CHECK_OGL_ERROR();
 
     // get the uniform from the shader
-    GLint location = glGetUniformLocation(program, "mvp");
-    CHECK_OGL_ERROR();
+    //GLint location = glGetUniformLocation(program, "mvp");
+    //CHECK_OGL_ERROR();
 
     // calculate the transform and set
-    glm::mat4 asset_mvp;
-    asset_mvp = vp * transform_c.transformation;
+    //glm::mat4 asset_mvp;
+    //asset_mvp = vp * transform_c.transformation;
 
-    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(asset_mvp));
+    GLint location = glGetUniformLocation(program, "model");
     CHECK_OGL_ERROR();
-    
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(transform_c.transformation));
+    CHECK_OGL_ERROR();
+    location = glGetUniformLocation(program, "view");
+    CHECK_OGL_ERROR();
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(view));
+    CHECK_OGL_ERROR();
+    location = glGetUniformLocation(program, "projection");
+    CHECK_OGL_ERROR();
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(projection));
+    CHECK_OGL_ERROR();
+    location = glGetUniformLocation(program, "projection");
+    CHECK_OGL_ERROR();
+    location = glGetUniformLocation(program, "camera_pos");
+    CHECK_OGL_ERROR();
+    glUniform3fv(location, 1, glm::value_ptr(camera_pos_component.position));
+    CHECK_OGL_ERROR();
 
     for(size_t i = 0; i < render_c.mesh_count; i++){
       glBindVertexArray(render_c.VAO[i]);
@@ -148,7 +173,62 @@ void RenderSystem::preLoadScene(Scene& scene){
     RenderComponent render = create_render_component(mesh);
     entity_manager.addRenderComponent(*entity_ptr, render);
   }
+
   entity_manager.destroyEntityView(&eview);
+
+  // Load the lighting
+  eview = entity_manager.createEntityView<LightComponent>();
+
+  // Get light entities
+  size_t light_count = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    light_count++;
+  }
+
+  // Prepare the light data to an opengl layout friendly struct
+  LightDataRaw* light_data = new LightDataRaw[MAX_LIGHTS];
+  size_t i = 0;
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    LightComponent light_c = entity_manager.getLight(*entity_ptr);
+    LightAngleComponent light_angle_c = { 360.0f };
+    LightDirectionComponent light_direction_c = { glm::vec3(0.0f, -1.0f, 0.0f) };
+    glm::vec3 position(0.0f);
+
+    if(entity_manager.hasEntityType<LightAngleComponent>(*entity_ptr)){
+      light_angle_c = entity_manager.getLightAngle(*entity_ptr);
+    }
+
+    if(entity_manager.hasEntityType<LightDirectionComponent>(*entity_ptr)){
+      light_direction_c = entity_manager.getLightDirection(*entity_ptr);
+    }
+
+    if(entity_manager.hasEntityType<PositionComponent>(*entity_ptr)){
+      position = entity_manager.getPosition(*entity_ptr).position;
+    }
+
+    light_data[i].position = position;
+    light_data[i].angle = light_angle_c.angle;
+    light_data[i].direction = light_direction_c.direction;
+    light_data[i].attenuation = light_c.attenuation;
+    light_data[i].color = light_c.color;
+    light_data[i].attenuation_type = (int)(light_c.attenuation_type);
+    light_data[i].active = 1;
+    i++;
+  }
+  entity_manager.destroyEntityView(&eview);
+
+  // Set the rest of the lights to zeros
+  for(size_t j = i; j < MAX_LIGHTS; j++){
+    light_data[j].active = 0;
+  }
+
+  // store the light data in a uniform buffer object
+  GLuint ubo;
+  glGenBuffers(1, &ubo);
+  glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+  glBufferData(GL_UNIFORM_BUFFER, sizeof(LightDataRaw)*MAX_LIGHTS, light_data, GL_DYNAMIC_DRAW);
+  glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
+  delete[] light_data;
 
 }
 

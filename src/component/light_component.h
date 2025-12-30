@@ -4,9 +4,9 @@
 #include <glm/vec3.hpp>
 
 enum LightAttenuationType{
-  Constant,
-  Linear,
-  Quadratic
+  Constant = 0,
+  Linear = 1,
+  Quadratic = 2
 };
 
 struct LightComponent{

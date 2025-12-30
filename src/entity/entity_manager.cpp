@@ -45,61 +45,6 @@ EntityManager::EntityView* EntityManager::createEntityViewImpl(initializer_list<
         found = false;
         break;
       }
-      /*if(arg_type_id == std::type_index(typeid(PositionComponent))){
-        if(!position_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(TransformComponent))){
-        if(!transform_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(ShaderComponent))){
-        if(!shader_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(MeshComponent))){
-        if(!mesh_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(LightComponent))){
-        if(!light_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(LightDirectionComponent))){
-        if(!light_direction_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(LightAngleComponent))){
-        if(!light_angle_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(CameraComponent))){
-        if(!camera_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }
-      else if(arg_type_id == std::type_index(typeid(RenderComponent))){
-        if(!render_pool.contains(entity)){
-          found = false;
-          break;
-        }
-      }*/
-
     }
     if(found){
       view_list.push_back(entity);

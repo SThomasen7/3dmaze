@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import mpl_toolkits.mplot3d
 import re
 
-def get_data(file_name="temp.txt"):
+def get_data(file_name="../temp.txt"):
 
     pos = list()
     lookat = list()
@@ -22,20 +22,6 @@ def get_data(file_name="temp.txt"):
 
     return pos, lookat
 
-def plot(points):
-
-    xs, ys, zs = zip(*points)
-
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    ax.plot(xs, ys, zs)
-
-    ax.set_xlabel("X")
-    ax.set_ylabel("Y")
-    ax.set_zlabel("Z")
-
-    plt.show()
 
 def plot(points):
 

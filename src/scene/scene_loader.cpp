@@ -300,7 +300,7 @@ void create_light_component(EntityManager& entity_manager, Entity entity, xmlNod
 
   LightAttenuationType type = LightAttenuationType::Constant;
   if(att_cstr != nullptr){
-    std::string att(reinterpret_cast<const char*>(att_t_cstr));
+    att_t = std::string(reinterpret_cast<const char*>(att_t_cstr));
     if(att_t == "constant"){
       type = LightAttenuationType::Constant;
     }
