@@ -269,10 +269,10 @@ RenderComponent create_render_component(const MeshComponent& meshes){
 
     size_t vertex_size = 3; // 3 for position
     if(mesh.has_normals){
-      vertex_size += 9; // normal + tan + bitan
+      vertex_size += 3; // normal + tan + bitan
     }
     if(mesh.has_uv){
-      vertex_size += 2; // u v coords
+      vertex_size += 8; // u v coords
     }
     
     // Bind the vertex attribute object
@@ -302,7 +302,9 @@ RenderComponent create_render_component(const MeshComponent& meshes){
                     mesh.normal);
       offset += sizeof(float) * mesh.vertex_count * 3;
       CHECK_OGL_ERROR();
+    }
 
+    if(mesh.has_uv){
       // copy tan data
       glBufferSubData(GL_ARRAY_BUFFER, offset,
                     sizeof(float) * mesh.vertex_count * 3,
@@ -316,10 +318,8 @@ RenderComponent create_render_component(const MeshComponent& meshes){
                     mesh.bittangent);
       offset += sizeof(float) * mesh.vertex_count * 3;
       CHECK_OGL_ERROR();
-    }
 
-    if(mesh.has_uv){
-      // copy textre data
+      // copy texture data
       glBufferSubData(GL_ARRAY_BUFFER, offset,
                     sizeof(float) * mesh.vertex_count * 2,
                     mesh.tex);

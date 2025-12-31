@@ -80,6 +80,7 @@ void load_triangle_meshes(MeshComponent& mesh, std::string filename){
 
   // Load triangle meshes
   for (size_t i = 0; i < scene->mNumMeshes; i++) {
+    std::cout << meshes[i] << std::endl;
     mesh.meshes[i] = load_triangle_mesh(meshes[i]);
   }
 }
@@ -98,11 +99,11 @@ Mesh load_triangle_mesh(aiMesh* mesh){
 
   if(out_mesh.has_normals) {
     out_mesh.normal = new float[mesh->mNumVertices * 3];
-    out_mesh.tangent = new float[mesh->mNumVertices * 3];
-    out_mesh.bittangent = new float[mesh->mNumVertices * 3];
   }
   if(out_mesh.has_uv) {
     out_mesh.tex = new float[mesh->mNumVertices * 2];
+    out_mesh.tangent = new float[mesh->mNumVertices * 3];
+    out_mesh.bittangent = new float[mesh->mNumVertices * 3];
   }
 
   // Copy vertex data into vertex buffer
@@ -112,6 +113,8 @@ Mesh load_triangle_mesh(aiMesh* mesh){
     out_mesh.vertex[(vert_idx * floats_per_vert) + 1] = vec.y;
     out_mesh.vertex[(vert_idx * floats_per_vert) + 2] = vec.z;
 
+    std::cout << mesh->mNumVertices << " " << vert_idx << std::endl;
+
     // Copy the normal data
     if(out_mesh.has_normals){
       // Set normals
@@ -119,6 +122,13 @@ Mesh load_triangle_mesh(aiMesh* mesh){
       out_mesh.normal[(vert_idx * 3) + 0] = vec.x;
       out_mesh.normal[(vert_idx * 3) + 1] = vec.y;
       out_mesh.normal[(vert_idx * 3) + 2] = vec.z;
+    }
+    
+    // Copy the texture coord data
+    if(out_mesh.has_uv){
+      aiVector3D &vec = mesh->mTextureCoords[0][vert_idx];
+      out_mesh.tex[(vert_idx * 2) + 0] = vec.x;
+      out_mesh.tex[(vert_idx * 2) + 1] = vec.y;
 
       // Set tangent vectors
       aiVector3D& tangent = mesh->mTangents[vert_idx];
@@ -131,13 +141,6 @@ Mesh load_triangle_mesh(aiMesh* mesh){
       out_mesh.bittangent[(vert_idx * 3) + 0] = bittangent.x;
       out_mesh.bittangent[(vert_idx * 3) + 1] = bittangent.y;
       out_mesh.bittangent[(vert_idx * 3) + 2] = bittangent.z;
-    }
-    
-    // Copy the texture coord data
-    if(out_mesh.has_uv){
-      aiVector3D &vec = mesh->mTextureCoords[0][vert_idx];
-      out_mesh.tex[(vert_idx * 2) + 0] = vec.x;
-      out_mesh.tex[(vert_idx * 2) + 1] = vec.y;
     }
   }
 
