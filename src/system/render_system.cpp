@@ -391,22 +391,17 @@ RenderComponent create_render_component(const MeshComponent& meshes){
 }
 
 void destroy_render_component(RenderComponent& render){
+  glDeleteBuffers(render.mesh_count, render.VAO);
+  CHECK_OGL_ERROR();
+  glDeleteBuffers(render.mesh_count, render.VBO);
+  CHECK_OGL_ERROR();
+  glDeleteBuffers(render.mesh_count, render.VIO);
+  CHECK_OGL_ERROR();
 
-  for(size_t i = 0; i < render.mesh_count; i++){
-
-    glDeleteBuffers(render.mesh_count, render.VAO);
-    CHECK_OGL_ERROR();
-    glDeleteBuffers(render.mesh_count, render.VBO);
-    CHECK_OGL_ERROR();
-    glDeleteBuffers(render.mesh_count, render.VIO);
-    CHECK_OGL_ERROR();
-
-    delete[] render.VAO;
-    delete[] render.VBO;
-    delete[] render.VIO;
-    delete[] render.index_count;
-
-  }
+  delete[] render.VAO;
+  delete[] render.VBO;
+  delete[] render.VIO;
+  delete[] render.index_count;
 }
 
 

@@ -57,8 +57,11 @@ void WindowManager::shutdown(){
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
   ImGui::DestroyContext();
-  glfwDestroyWindow(window);
-  window = nullptr;
+  if(window){
+    glfwDestroyWindow(window);
+    window = nullptr;
+  }
+  glfwTerminate();
   LOG(LL::Info, "Window manager shutdown.");
 }
 
