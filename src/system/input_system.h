@@ -21,6 +21,7 @@ public:
   void pollEvents(ApplicationSettings& settings);
   void setupWindow(WindowManager& window_manager);
   void setupEntityManager(EntityManager& entity_manager);
+  void setupAppSettings(ApplicationSettings& settings);
 
   void releaseCursor();
   void holdCursor();
@@ -28,6 +29,7 @@ public:
 private:
   WindowManager* window_manager;
   EntityManager* entity_manager;
+  ApplicationSettings* settings;
   double mouse_xpos, mouse_ypos;
   bool first_mouse;
   float pause_delay;

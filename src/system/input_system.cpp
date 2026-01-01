@@ -96,6 +96,10 @@ void InputSystem::setupEntityManager(EntityManager& entity_manager){
   this->entity_manager = &entity_manager;
 }
 
+void InputSystem::setupAppSettings(ApplicationSettings& settings){
+  this->settings = &settings;
+}
+
 void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
   auto* self = static_cast<InputSystem*>(
         glfwGetWindowUserPointer(window)
@@ -135,6 +139,11 @@ void InputSystem::mouseCallback(GLFWwindow* window, double temp_mousex, double t
   auto* self = static_cast<InputSystem*>(
         glfwGetWindowUserPointer(window)
   );
+
+  if(self->settings->is_paused){
+    return;
+  }
+
   if(self->first_mouse){
     self->mouse_xpos = temp_mousex; 
     self->mouse_ypos = temp_mousey; 
@@ -177,10 +186,19 @@ void InputSystem::mouseCallback(GLFWwindow* window, double temp_mousex, double t
 
 void InputSystem::releaseCursor(){
   glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-  glfwGetCursorPos(window_manager->getWindow(), &mouse_xpos, &mouse_ypos);
+
+  // Move mouse to the center of the screen
+  int width, height;
+  first_mouse = true;
+  glfwGetWindowSize(window_manager->getWindow(), &width, &height);
+  double centerX = width / 2.0;
+  double centerY = height / 2.0;
+  glfwSetCursorPos(window_manager->getWindow(), centerX, centerY);
+  first_mouse = true;
 }
 
 void InputSystem::holdCursor(){
   glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  first_mouse = true;
 }
 

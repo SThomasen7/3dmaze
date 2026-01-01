@@ -21,26 +21,23 @@ void Engine::execute(){
   float FRAME_RATE = 1.0f/60.0f;
 
   while(!settings.should_close){
-    input_system.pollEvents(settings);
     window_manager.pollEvents(settings);
+    input_system.pollEvents(settings);
 
     float current_time = glfwGetTime();
     float delta_time = current_time - previous_time;
     previous_time = current_time;
 
     window_manager.preRender();
-    // Don't render or process if we are paused
-    if(settings.is_paused){
-      window_manager.postRender();
-      continue;
-    }
-
     accumulator += delta_time;
 
-
-    input_system.process(scene, delta_time);
     if(accumulator >= FRAME_RATE){
-      physics_system.process(scene, accumulator);
+
+      if(!settings.is_paused){
+        input_system.process(scene, delta_time);
+        physics_system.process(scene, accumulator);
+      }
+
       render_system.process(scene, accumulator);
       accumulator = 0.0f;
     }
@@ -58,6 +55,7 @@ void Engine::init(){
   input_system.init(&event_dispatcher);
   physics_system.init(&event_dispatcher);
   input_system.setupEntityManager(scene.getEntityManager());
+  input_system.setupAppSettings(settings);
 
   scene.setEventDispatcher(&event_dispatcher);
 
