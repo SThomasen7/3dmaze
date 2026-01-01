@@ -112,7 +112,7 @@ void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int act
   }
   if(key == GLFW_KEY_ESCAPE){
     float current_time = glfwGetTime();
-    if(current_time - self->pause_delay < 0.1f){
+    if(current_time - self->pause_delay < 0.4f){
       return;
     }
     self->pause_delay = current_time;
@@ -126,7 +126,7 @@ void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int act
   if(key == GLFW_KEY_F1){
 
     float current_time = glfwGetTime();
-    if(current_time - self->f1_delay < 0.2f){
+    if(current_time - self->f1_delay < 0.4f){
       return;
     }
     self->f1_delay = current_time;
