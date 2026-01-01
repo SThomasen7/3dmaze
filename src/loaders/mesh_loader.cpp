@@ -80,7 +80,6 @@ void load_triangle_meshes(MeshComponent& mesh, std::string filename){
 
   // Load triangle meshes
   for (size_t i = 0; i < scene->mNumMeshes; i++) {
-    std::cout << meshes[i] << std::endl;
     mesh.meshes[i] = load_triangle_mesh(meshes[i]);
   }
 }
@@ -113,7 +112,6 @@ Mesh load_triangle_mesh(aiMesh* mesh){
     out_mesh.vertex[(vert_idx * floats_per_vert) + 1] = vec.y;
     out_mesh.vertex[(vert_idx * floats_per_vert) + 2] = vec.z;
 
-    std::cout << mesh->mNumVertices << " " << vert_idx << std::endl;
 
     // Copy the normal data
     if(out_mesh.has_normals){
