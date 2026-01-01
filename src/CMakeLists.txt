@@ -19,6 +19,7 @@ file(GLOB SOURCE_FILES
   manager/*.cpp
   scene/*.cpp
   loaders/*.cpp
+  event/*.cpp
   ${IMGUI_SOURCES}
 )
 
@@ -49,6 +50,7 @@ target_include_directories(MazeLib PUBLIC
   manager/
   scene/
   loaders/
+  event/
 )
 
 target_include_directories(MazeTestLib PUBLIC

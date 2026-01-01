@@ -7,6 +7,7 @@
 #include "input_system.h"
 #include "physics_system.h"
 #include "application_settings.h"
+#include "event_dispatcher.h"
 #include "scene.h"
 #include <string>
 
@@ -36,6 +37,9 @@ private:
 
   // Settings
   ApplicationSettings settings;
+
+  // Event Dispatcher
+  EventDispatcher event_dispatcher;
 
 };
 

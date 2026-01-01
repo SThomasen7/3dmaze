@@ -8,12 +8,13 @@
 #include <GLFW/glfw3.h>
 
 
-class InputSystem : public System{
+class InputSystem : private System{
+  // Inherit dispatcher reference from system
 
 public:
-  InputSystem() { window_manager = nullptr; entity_manager = nullptr; };
+  InputSystem();
 
-  void init() override;
+  void init(EventDispatcher* dispatcher) override;
   void process(Scene& scene, float dt) override;
   void shutdown() override;
 
@@ -28,6 +29,7 @@ private:
   bool first_mouse;
 
   static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+  static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 };
 

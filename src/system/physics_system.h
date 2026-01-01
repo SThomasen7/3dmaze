@@ -6,12 +6,13 @@
 #include "camera_component.h"
 #include <glm/vec3.hpp>
 
-class PhysicsSystem : public System{
+class PhysicsSystem : private System{
+  // Inherit dispatcher reference from system
 
 public:
-  PhysicsSystem() { }
+  PhysicsSystem();
 
-  void init() override;
+  void init(EventDispatcher* dispatcher) override;
   void process(Scene& scene, float dt) override;
   void shutdown() override;
 

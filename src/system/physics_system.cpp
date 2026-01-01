@@ -4,9 +4,11 @@
 #include <glm/ext/matrix_clip_space.hpp> // glm::perspective
 #include <glm/ext/scalar_constants.hpp> // glm::pi
 
+PhysicsSystem::PhysicsSystem() { }
 
-void PhysicsSystem::init(){
+void PhysicsSystem::init(EventDispatcher* dispatcher){
   LOG(LL::Info, "Initializing Physics System.");
+  this->dispatcher = dispatcher;
 }
 
 void PhysicsSystem::process(Scene& scene, float dt){

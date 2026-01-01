@@ -19,13 +19,14 @@ struct LightDataRaw{
 
 const int MAX_LIGHTS = 16;
 
-RenderSystem::RenderSystem(){ }
+RenderSystem::RenderSystem() { }
 
 RenderComponent create_render_component(const MeshComponent& mesh);
 void destroy_render_component(RenderComponent& render);
 
-void RenderSystem::init(){
+void RenderSystem::init(EventDispatcher* dispatcher){
   LOG(LL::Info, "Initializing Render System.");
+  this->dispatcher = dispatcher;
 }
 
 void RenderSystem::process(Scene& scene, float dt){

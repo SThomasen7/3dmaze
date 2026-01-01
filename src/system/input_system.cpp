@@ -4,13 +4,22 @@
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-void InputSystem::init(){
+InputSystem::InputSystem(){ 
+  window_manager = nullptr; 
+  entity_manager = nullptr; 
+  dispatcher = nullptr;
+};
+
+void InputSystem::init(EventDispatcher* dispatcher){
+  this->dispatcher = dispatcher;
   LOG(LL::Info, "Initializing Input System.");
   glfwSetWindowUserPointer(window_manager->getWindow(), this);
   glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetKeyCallback(window_manager->getWindow(), key_callback);
   glfwGetCursorPos(window_manager->getWindow(), &mouse_xpos, &mouse_ypos);
   glfwSetCursorPosCallback(window_manager->getWindow(), InputSystem::mouseCallback);
+  glfwSetFramebufferSizeCallback(window_manager->getWindow(), 
+      InputSystem::framebufferSizeCallback);
   first_mouse = true;
 }
 
@@ -93,6 +102,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
 }
+
+void InputSystem::framebufferSizeCallback(GLFWwindow* window, int width, int height){
+  ResizeScreenEvent resize_event(width, height);
+  auto* self = static_cast<InputSystem*>(
+        glfwGetWindowUserPointer(window)
+  );
+  self->dispatcher->dispatch(resize_event);
+  self->window_manager->bufferResize(width, height);
+}
+
 
 void InputSystem::mouseCallback(GLFWwindow* window, double temp_mousex, double temp_mousey){
 

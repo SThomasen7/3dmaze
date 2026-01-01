@@ -13,13 +13,16 @@ Engine::Engine(){
 void Engine::execute(){
 
   // Init systems
-  render_system.init();
+  render_system.init(&event_dispatcher);
   input_system.setupWindow(window_manager);
-  input_system.init();
-  physics_system.init();
+  input_system.init(&event_dispatcher);
+  physics_system.init(&event_dispatcher);
 
   render_system.preLoadScene(scene);
   input_system.setupEntityManager(scene.getEntityManager());
+
+  scene.setEventDispatcher(&event_dispatcher);
+
   float start_time = glfwGetTime();
   float previous_time = glfwGetTime();
   float accumulator = 0.0f;

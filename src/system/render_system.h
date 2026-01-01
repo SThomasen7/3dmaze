@@ -4,13 +4,14 @@
 #include "system.h"
 #include "scene.h"
 
-class RenderSystem : public System{
+class RenderSystem : private System{
+  // Inherit dispatcher reference from system
 
 public:
 
   RenderSystem();
 
-  void init() override;
+  void init(EventDispatcher* dispatcher) override;
   void process(Scene& scene, float dt) override;
   void shutdown() override;
 
