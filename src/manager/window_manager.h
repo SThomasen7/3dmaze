@@ -25,8 +25,12 @@ public:
   void bufferResize(int width, int height);
   GLFWwindow* getWindow();
 
+  void makeFullScreen();
+  void makeWindowed();
+
 private:
   //void handleScreenResizeEvent(const ResizeScreenEvent &event);
+  int buffer_width, buffer_height;
 };
 
 #endif

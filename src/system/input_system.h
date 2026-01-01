@@ -25,6 +25,8 @@ public:
 
   void releaseCursor();
   void holdCursor();
+  void makeFullScreen();
+  void makeWindowed();
 
 private:
   WindowManager* window_manager;
@@ -32,7 +34,9 @@ private:
   ApplicationSettings* settings;
   double mouse_xpos, mouse_ypos;
   bool first_mouse;
+  bool is_full_screen;
   float pause_delay;
+  float f1_delay;
 
   static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
   static void framebufferSizeCallback(GLFWwindow* window, int width, int height);

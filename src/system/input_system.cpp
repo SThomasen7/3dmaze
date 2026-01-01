@@ -7,6 +7,7 @@ InputSystem::InputSystem(){
   entity_manager = nullptr; 
   dispatcher = nullptr;
   pause_delay = glfwGetTime();
+  f1_delay = glfwGetTime();
 }
 
 void InputSystem::init(EventDispatcher* dispatcher){
@@ -20,6 +21,7 @@ void InputSystem::init(EventDispatcher* dispatcher){
   glfwSetFramebufferSizeCallback(window_manager->getWindow(), 
       InputSystem::framebufferSizeCallback);
   first_mouse = true;
+  is_full_screen = false;
 }
 
 void InputSystem::process(Scene& scene, float dt){
@@ -110,16 +112,33 @@ void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int act
   }
   if(key == GLFW_KEY_ESCAPE){
     float current_time = glfwGetTime();
-    if(current_time - self->pause_delay < 0.5f){
+    if(current_time - self->pause_delay < 0.1f){
       return;
     }
-
     self->pause_delay = current_time;
     TogglePauseEvent pause_event;
     auto* self = static_cast<InputSystem*>(
           glfwGetWindowUserPointer(window)
     );
     self->dispatcher->dispatch(pause_event);
+  }
+
+  if(key == GLFW_KEY_F1){
+
+    float current_time = glfwGetTime();
+    if(current_time - self->f1_delay < 0.2f){
+      return;
+    }
+    self->f1_delay = current_time;
+
+    LOG(LL::Verbose, "F1 pressed");
+    if(self->is_full_screen){
+      self->makeWindowed();
+    }
+    else{
+      self->makeFullScreen();
+    }
+    
   }
 }
 
@@ -200,5 +219,21 @@ void InputSystem::releaseCursor(){
 void InputSystem::holdCursor(){
   glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   first_mouse = true;
+}
+
+void InputSystem::makeFullScreen(){
+  if(is_full_screen){
+    return;
+  }
+  is_full_screen = true;
+  window_manager->makeFullScreen();
+}
+
+void InputSystem::makeWindowed(){
+  if(!is_full_screen){
+    return;
+  }
+  is_full_screen = false;
+  window_manager->makeWindowed();
 }
 

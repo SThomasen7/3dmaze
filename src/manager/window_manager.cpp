@@ -94,13 +94,25 @@ void WindowManager::postRender(){
 
 void WindowManager::bufferResize(int width, int height){
   glViewport(0, 0, width, height);
+  buffer_width = width;
+  buffer_height = height;
 }
 
 GLFWwindow* WindowManager::getWindow(){
   return window;
 }
 
-/*void WindowManager::handleScreenResizeEvent(const ResizeScreenEvent &event){
-  bufferResize(event.buffer_x, event.buffer_y);
-}*/
+void WindowManager::makeFullScreen(){
+  LOG(LL::Verbose, "Making full screen...");
+  GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+  const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+  glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+}
+
+void WindowManager::makeWindowed(){
+  LOG(LL::Verbose, "Making windowed..");
+  glfwSetWindowMonitor(window, NULL, 0, 0, 0, 0, GLFW_DONT_CARE);
+  glfwSetWindowMonitor(window, NULL, buffer_width/2, buffer_height/2, 
+      buffer_width, buffer_height, GLFW_DONT_CARE);
+}
 
