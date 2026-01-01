@@ -3,6 +3,7 @@
 
 struct ApplicationSettings{
   bool should_close;
+  bool is_paused;
 };
 
 #endif 

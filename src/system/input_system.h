@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 
 
-class InputSystem : private System{
+class InputSystem : public System{
   // Inherit dispatcher reference from system
 
 public:
@@ -22,14 +22,19 @@ public:
   void setupWindow(WindowManager& window_manager);
   void setupEntityManager(EntityManager& entity_manager);
 
+  void releaseCursor();
+  void holdCursor();
+
 private:
   WindowManager* window_manager;
   EntityManager* entity_manager;
   double mouse_xpos, mouse_ypos;
   bool first_mouse;
+  float pause_delay;
 
   static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
   static void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+  static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 };
 

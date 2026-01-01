@@ -11,5 +11,13 @@ public:
   float buffer_x, buffer_y;
 };
 
+struct TogglePauseEvent : IEvent {
+public:
+
+  TogglePauseEvent(bool force, bool paused) : force(force), pause(paused) {}
+  TogglePauseEvent() : force(false), pause(false) {}
+
+  bool force, pause;
+};
 
 #endif

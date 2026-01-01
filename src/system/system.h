@@ -13,7 +13,6 @@ public:
   virtual void process(Scene& scene, float dt) = 0;
   virtual void shutdown() = 0;
 
-protected:
   EventDispatcher* dispatcher;
 
 };

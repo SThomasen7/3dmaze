@@ -2,20 +2,19 @@
 #include <glm/vec3.hpp>
 #include <glm/vec2.hpp>
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
 InputSystem::InputSystem(){ 
   window_manager = nullptr; 
   entity_manager = nullptr; 
   dispatcher = nullptr;
-};
+  pause_delay = glfwGetTime();
+}
 
 void InputSystem::init(EventDispatcher* dispatcher){
   this->dispatcher = dispatcher;
   LOG(LL::Info, "Initializing Input System.");
   glfwSetWindowUserPointer(window_manager->getWindow(), this);
-  glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-  glfwSetKeyCallback(window_manager->getWindow(), key_callback);
+  holdCursor();
+  glfwSetKeyCallback(window_manager->getWindow(), InputSystem::keyCallback);
   glfwGetCursorPos(window_manager->getWindow(), &mouse_xpos, &mouse_ypos);
   glfwSetCursorPosCallback(window_manager->getWindow(), InputSystem::mouseCallback);
   glfwSetFramebufferSizeCallback(window_manager->getWindow(), 
@@ -97,9 +96,26 @@ void InputSystem::setupEntityManager(EntityManager& entity_manager){
   this->entity_manager = &entity_manager;
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods){
+  auto* self = static_cast<InputSystem*>(
+        glfwGetWindowUserPointer(window)
+  );
+
   if(key == GLFW_KEY_Q){
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+  }
+  if(key == GLFW_KEY_ESCAPE){
+    float current_time = glfwGetTime();
+    if(current_time - self->pause_delay < 0.5f){
+      return;
+    }
+
+    self->pause_delay = current_time;
+    TogglePauseEvent pause_event;
+    auto* self = static_cast<InputSystem*>(
+          glfwGetWindowUserPointer(window)
+    );
+    self->dispatcher->dispatch(pause_event);
   }
 }
 
@@ -158,3 +174,13 @@ void InputSystem::mouseCallback(GLFWwindow* window, double temp_mousex, double t
     component.pans.push_back(glm::vec2(delta_x, delta_y)*mouse_speed);
   }
 }
+
+void InputSystem::releaseCursor(){
+  glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+  glfwGetCursorPos(window_manager->getWindow(), &mouse_xpos, &mouse_ypos);
+}
+
+void InputSystem::holdCursor(){
+  glfwSetInputMode(window_manager->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+}
+

@@ -8,6 +8,7 @@
 #include "physics_system.h"
 #include "application_settings.h"
 #include "event_dispatcher.h"
+#include "system_events.h"
 #include "scene.h"
 #include <string>
 
@@ -24,6 +25,8 @@ public:
   void execute();
 
 private:
+
+  void handlePauseEvent(const TogglePauseEvent& event);
 
   // Managers
   WindowManager window_manager;

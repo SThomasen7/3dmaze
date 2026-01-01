@@ -7,7 +7,6 @@ int main(void){
   Engine engine;
 
   engine.init();
-
   engine.loadScene("basic.xml");
   engine.execute();
   engine.shutdown();
