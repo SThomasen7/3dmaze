@@ -12,7 +12,8 @@ CMakeFiles/
 Makefile
 cmake_install.cmake
 compile_commands.json
-assets/
+assets/obj/
+assets/textures/
 *.a
 src/test_output/
 imgui.ini

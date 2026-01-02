@@ -1,0 +1,82 @@
+<scene>
+  <camera name='camera_1' fov='60' buffer_x='1280' buffer_y='720' z_near='1' z_far='100' projection_type='perspective'>
+    <up x='0' y='1' z='0'/>
+    <lookat x='0' y='0' z='-1'/>
+    <position x='0' y='0' z='-8'/>
+  </camera>
+  <light attenuation='0.3' angle='90' attenuation_type='constant'>
+    <color x='1' y='1' z='1'/>
+    <position x='5' y='100' z='5'/>
+    <direction x='0' y='-1' z='0'/>
+  </light>
+  <light attenuation='0.5' angle='30' attenuation_type='constant'>
+    <color x='1' y='0' z='0'/>
+    <position x='0' y='6' z='0'/>
+    <direction x='0' y='-1' z='100'/>
+  </light>
+  <light attenuation='0.5' angle='30' attenuation_type='constant'>
+    <color x='0' y='1' z='0'/>
+    <position x='10' y='0' z='0'/>
+    <direction x='0' y='0' z='0'/>
+  </light>
+  <light attenuation='0.3' angle='40' attenuation_type='constant'>
+    <color x='0' y='1' z='1'/>
+    <position x='-5' y='10' z='-5'/>
+    <direction x='5' y='-1' z='5'/>
+  </light>
+  <asset>
+    <transformation>
+      <rotate x='1.0' y='1.0' z='1.0' w='0.0'/>
+      <scale x='0.75' y='2.0' z='2.0'/>
+      <translate x='0' y='-1' z='-3'/>
+      <!--
+      <col1 x='0.75' y='0' z='0' w='0'/>
+      <col2 x='0' y='0.75' z='0' w='0'/>
+      <col3 x='0' y='0' z='0.75' w='0'/>
+      <col4 x='0' y='0' z='-4' w='1'/>
+      -->
+    </transformation>
+    <mesh name='cube.obj'></mesh>
+    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+  </asset>
+  <asset>
+    <transformation>
+      <scale x='3.0' y='3.0' z='3.0'/>
+      <translate x='0' y='-1' z='8.0'/>
+      <!--
+      <col1 x='0.75' y='0' z='0' w='0'/>
+      <col2 x='0' y='0.75' z='0' w='0'/>
+      <col3 x='0' y='0' z='0.75' w='0'/>
+      <col4 x='0' y='0' z='-4' w='1'/>
+      -->
+    </transformation>
+    <mesh name='sewer_scene_fixed.obj'></mesh>
+    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+  </asset>
+  <asset>
+    <transformation>
+      <translate x='0' y='2' z='0.0'/>
+    </transformation>
+      <!--
+      <col1 x='0.75' y='0' z='0' w='0'/>
+      <col2 x='0' y='0.75' z='0' w='0'/>
+      <col3 x='0' y='0' z='0.75' w='0'/>
+      <col4 x='0' y='0' z='-4' w='1'/>
+      -->
+    <mesh name='bunny.obj'></mesh>
+    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+  </asset>
+  <asset>
+    <transformation>
+      <translate x='2.0' y='2.0' z='2.0'/>
+    </transformation>
+      <!--
+      <col1 x='0.75' y='0' z='0' w='0'/>
+      <col2 x='0' y='0.75' z='0' w='0'/>
+      <col3 x='0' y='0' z='0.75' w='0'/>
+      <col4 x='0' y='0' z='-4' w='1'/>
+      -->
+    <mesh name='sphere2.obj'></mesh>
+    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+  </asset>
+</scene>
