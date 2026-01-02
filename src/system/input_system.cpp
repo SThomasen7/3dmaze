@@ -25,7 +25,7 @@ void InputSystem::init(EventDispatcher* dispatcher){
 }
 
 void InputSystem::process(Scene& scene, float dt){
-  float move_speed = 5.0f * dt;
+  float move_speed = 8.0f * dt;
   float timestep = 1.0f/60.0f; // framerate TODO make dynamic
   GLFWwindow* window = window_manager->getWindow();
   EntityManager& entity_manager = scene.getEntityManager();
