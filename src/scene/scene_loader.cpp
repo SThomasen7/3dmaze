@@ -29,13 +29,13 @@
 const std::string scene_validation_file = base_dir+std::string("/src/misc/scene_validate.xsd");
 
 // Helper function declarations
-void create_scene_nodes(EntityManager& entity_manager, xmlNodePtr& xml_node);
+void create_scene_nodes(Scene& scene, xmlNodePtr& xml_node);
 
-void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
-void create_light_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
-void create_transform_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
-void create_mesh_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
-void create_shader_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node);
+void create_camera_component(Scene& scene, Entity entity, xmlNodePtr& node);
+void create_light_component(Scene& scene, Entity entity, xmlNodePtr& node);
+void create_transform_component(Scene& scene, Entity entity, xmlNodePtr& node);
+void create_mesh_component(Scene& scene, Entity entity, xmlNodePtr& node);
+void create_shader_component(Scene& scene, Entity entity, xmlNodePtr& node);
 
 glm::vec3 load_vec3(xmlNodePtr& node);
 glm::vec4 load_vec4(xmlNodePtr& node);
@@ -80,8 +80,7 @@ void SceneLoader::load(Scene& scene, std::string filename){
   }
 
   xmlNodePtr root = xmlDocGetRootElement(doc);
-  EntityManager& entity_manager = scene.getEntityManager();
-  create_scene_nodes(entity_manager, root);
+  create_scene_nodes(scene, root);
 
   // The first camera is the active camera
   /*using EntityView = EntityManager::EntityView;
@@ -105,8 +104,8 @@ void SceneLoader::load(Scene& scene, std::string filename){
 
 
 // Recursively load all of the children nodes.
-void create_scene_nodes(EntityManager& entity_manager, xmlNodePtr& xml_node){
-
+void create_scene_nodes(Scene& scene, xmlNodePtr& xml_node){
+  EntityManager& entity_manager = scene.getEntityManager();
   bool is_root = false;
   // An entity is wasted on the scene, but that's ok.
   Entity entity = entity_manager.createEntity();
@@ -116,32 +115,33 @@ void create_scene_nodes(EntityManager& entity_manager, xmlNodePtr& xml_node){
   }
   else if(xml_node->type == XML_ELEMENT_NODE 
       && xmlStrEqual(xml_node->name, BAD_CAST "camera")){
-    create_camera_component(entity_manager, entity, xml_node);
+    create_camera_component(scene, entity, xml_node);
   }
   else if(xml_node->type == XML_ELEMENT_NODE 
       && xmlStrEqual(xml_node->name, BAD_CAST "light")){
-    create_light_component(entity_manager, entity, xml_node);
+    create_light_component(scene, entity, xml_node);
   }
 
   // Check if any of the child nodes are components
   for (xmlNodePtr cur = xml_node->children; cur != NULL; cur = cur->next) {
     if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "transformation")) {
-      create_transform_component(entity_manager, entity, cur);
+      create_transform_component(scene, entity, cur);
       continue;
     }
     else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "mesh")) {
-      create_mesh_component(entity_manager, entity, cur);
+      create_mesh_component(scene, entity, cur);
       continue;
     }
     else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "shader")) {
-      create_shader_component(entity_manager, entity, cur);
+      create_shader_component(scene, entity, cur);
       continue;
     }
-    create_scene_nodes(entity_manager, cur);
+    create_scene_nodes(scene, cur);
   }
 }
 
-void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+void create_camera_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
   LOG(LL::Verbose, "Loading camera component.");
   
   float fov;
@@ -236,7 +236,8 @@ void create_camera_component(EntityManager& entity_manager, Entity entity, xmlNo
   xmlFree(projection_type_cstr);
 }
 
-void create_light_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+void create_light_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
 
   LOG(LL::Verbose, "Loading light component.");
   glm::vec3 color, position, direction;
@@ -321,7 +322,8 @@ void create_light_component(EntityManager& entity_manager, Entity entity, xmlNod
   );
 }
 
-void create_transform_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+void create_transform_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
   LOG(LL::Verbose, "Loading transform component.");
   // determine if its the 4 vec3 method or not.
   bool has_columns = false;
@@ -404,14 +406,20 @@ void create_transform_component(EntityManager& entity_manager, Entity entity, xm
   }
 }
 
-void create_mesh_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+void create_mesh_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
   LOG(LL::Verbose, "Loading mesh component.");
   std::string filename = get_name(node); 
   LOG(LL::Verbose, "Mesh file: "+filename);
-  entity_manager.addMeshComponent(entity, MeshLoader::load(filename));
+  if(!scene.mesh_manager.isLoaded(filename)){
+    MeshComponentData data = MeshLoader::load(filename);
+    scene.mesh_manager.load(filename, data);
+  }
+  entity_manager.addMeshComponent(entity, { filename });
 }
 
-void create_shader_component(EntityManager& entity_manager, Entity entity, xmlNodePtr& node){
+void create_shader_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
   LOG(LL::Verbose, "Loading shader component.");
   xmlChar *vertex_cstr = xmlGetProp(node, BAD_CAST "vertex");
   xmlChar *fragment_cstr = xmlGetProp(node, BAD_CAST "fragment");
@@ -423,7 +431,12 @@ void create_shader_component(EntityManager& entity_manager, Entity entity, xmlNo
   xmlFree(fragment_cstr);
   xmlFree(vertex_cstr);
 
-  entity_manager.addShaderComponent(entity, ShaderLoader::load(vertex_str, fragment_str));
+  std::string key = vertex_str + std::string("_") + fragment_str;
+  if(!scene.shader_manager.isLoaded(key)){
+    ShaderComponentData data = ShaderLoader::load(vertex_str, fragment_str);
+    scene.shader_manager.load(key, data);
+  }
+  entity_manager.addShaderComponent(entity, { key });
 }
 
 glm::vec3 load_vec3(xmlNodePtr& node){

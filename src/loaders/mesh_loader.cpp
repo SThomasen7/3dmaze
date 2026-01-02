@@ -8,18 +8,18 @@
 #include "consts.h"
 #include "logger.h"
 
-void load_triangle_meshes(MeshComponent& mesh, std::string filename);
+void load_triangle_meshes(MeshComponentData& mesh, std::string filename);
 Mesh load_triangle_mesh(aiMesh* mesh);
 
-MeshComponent MeshLoader::load(std::string filename){
-  MeshComponent mesh;
+MeshComponentData MeshLoader::load(std::string filename){
+  MeshComponentData mesh;
   LOG(LL::Verbose, "Loading mesh: ");
   LOG(LL::Verbose, asset_path+std::string("obj/")+filename);
   load_triangle_meshes(mesh, asset_path+std::string("obj/")+filename);
   return mesh;
 }
 
-void MeshLoader::free(MeshComponent& mesh_component){
+void MeshLoader::free(MeshComponentData& mesh_component){
   // Free the buffer data
   for(size_t i = 0; i < mesh_component.mesh_count; i++){
     Mesh& mesh = mesh_component.meshes[i];
@@ -55,7 +55,7 @@ void MeshLoader::free(MeshComponent& mesh_component){
   mesh_component.mesh_count = 0;
 }
 
-void load_triangle_meshes(MeshComponent& mesh, std::string filename){
+void load_triangle_meshes(MeshComponentData& mesh, std::string filename){
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(filename,
                     aiProcess_Triangulate | 

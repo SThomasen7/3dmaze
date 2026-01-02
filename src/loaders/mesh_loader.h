@@ -8,8 +8,8 @@ class MeshLoader{
 
 public:
 
-  static MeshComponent load(std::string filename);
-  static void free(MeshComponent& mesh);
+  static MeshComponentData load(std::string filename);
+  static void free(MeshComponentData& mesh);
 
 private:
   MeshLoader() { }

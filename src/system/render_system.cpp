@@ -8,6 +8,8 @@
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <memory>
+
 struct LightDataRaw{
   glm::vec3 position; float angle;
   glm::vec3 direction; float attenuation;
@@ -21,7 +23,7 @@ const int MAX_LIGHTS = 16;
 
 RenderSystem::RenderSystem() { }
 
-RenderComponent create_render_component(const MeshComponent& mesh);
+RenderComponent create_render_component(const MeshComponentData& mesh);
 void destroy_render_component(RenderComponent& render);
 
 void RenderSystem::init(EventDispatcher* dispatcher){
@@ -98,7 +100,7 @@ void RenderSystem::process(Scene& scene, float dt){
     TransformComponent transform_c = entity_manager.getTransform(*entity_ptr);
 
     // set the shader
-    GLuint program = shader_c.program;
+    GLuint program = scene.shader_manager.get(shader_c.key)->program;
     glUseProgram(program);
     CHECK_OGL_ERROR();
 
@@ -162,6 +164,7 @@ void RenderSystem::preLoadScene(Scene& scene){
   glFrontFace(GL_CCW);
 
   EntityManager& entity_manager = scene.getEntityManager();
+  ResourceManager<MeshComponentData>& mesh_manager = scene.mesh_manager;
 
   // Create the view
   using EntityView = EntityManager::EntityView;
@@ -170,8 +173,9 @@ void RenderSystem::preLoadScene(Scene& scene){
 
   // Get the entities with mesh components and get the mesh data
   for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
-    MeshComponent mesh = entity_manager.getMesh(*entity_ptr);
-    RenderComponent render = create_render_component(mesh);
+    MeshComponent mesh_component = entity_manager.getMesh(*entity_ptr);
+    std::shared_ptr<MeshComponentData> mesh = mesh_manager.get(mesh_component.key);
+    RenderComponent render = create_render_component(*mesh);
     entity_manager.addRenderComponent(*entity_ptr, render);
   }
 
@@ -249,7 +253,7 @@ void RenderSystem::clearScene(Scene& scene){
   }
 }
 
-RenderComponent create_render_component(const MeshComponent& meshes){
+RenderComponent create_render_component(const MeshComponentData& meshes){
 
   RenderComponent obuffs;
   obuffs.mesh_count = meshes.mesh_count;

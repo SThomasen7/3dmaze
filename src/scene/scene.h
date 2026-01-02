@@ -4,6 +4,9 @@
 #include "entity_manager.h"
 #include "event_dispatcher.h"
 #include "system_events.h"
+#include "resource_manager.h"
+
+#include "shader_component.h"
 
 class Scene{
 
@@ -16,6 +19,9 @@ public:
   void setEventDispatcher(EventDispatcher* dispatcher);
 
   int active_camera;
+
+  ResourceManager<ShaderComponentData> shader_manager;
+  ResourceManager<MeshComponentData> mesh_manager;
 
 private:
 

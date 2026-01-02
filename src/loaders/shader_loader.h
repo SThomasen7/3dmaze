@@ -7,7 +7,7 @@
 class ShaderLoader{
 
 public:
-  static ShaderComponent load(
+  static ShaderComponentData load(
       std::string vertex_name, std::string fragment_name
   );
 
