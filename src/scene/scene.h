@@ -8,6 +8,8 @@
 
 #include "shader_component.h"
 
+#include <memory>
+
 class Scene{
 
 public:
@@ -20,9 +22,9 @@ public:
 
   int active_camera;
 
-  ResourceManager<ShaderComponentData> shader_manager;
-  ResourceManager<MeshComponentData> mesh_manager;
-  ResourceManager<TextureComponentData> texture_manager;
+  ResourceManager<std::shared_ptr<ShaderComponentData>> shader_manager;
+  ResourceManager<std::shared_ptr<MeshComponentData>> mesh_manager;
+  ResourceManager<std::shared_ptr<TextureComponentData>> texture_manager;
 
 private:
 

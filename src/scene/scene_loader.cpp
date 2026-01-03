@@ -419,7 +419,7 @@ void create_mesh_component(Scene& scene, Entity entity, xmlNodePtr& node){
   std::string filename = get_name(node); 
   LOG(LL::Verbose, "Mesh file: "+filename);
   if(!scene.mesh_manager.isLoaded(filename)){
-    MeshComponentData data = MeshLoader::load(filename);
+    std::shared_ptr<MeshComponentData> data = MeshLoader::load(filename);
     scene.mesh_manager.load(filename, data);
   }
   entity_manager.addMeshComponent(entity, { filename });
@@ -440,7 +440,7 @@ void create_shader_component(Scene& scene, Entity entity, xmlNodePtr& node){
 
   std::string key = vertex_str + std::string("_") + fragment_str;
   if(!scene.shader_manager.isLoaded(key)){
-    ShaderComponentData data = ShaderLoader::load(vertex_str, fragment_str);
+    std::shared_ptr<ShaderComponentData> data = ShaderLoader::load(vertex_str, fragment_str);
     scene.shader_manager.load(key, data);
   }
   entity_manager.addShaderComponent(entity, { key });
@@ -459,15 +459,25 @@ void create_texture_component(Scene& scene, Entity entity, xmlNodePtr& node){
   std::string texture_filename(reinterpret_cast<const char*>(name_cstr));
   xmlFree(name_cstr);
 
-  LOG(LL::Verbose, "texture file: "+texture_filename);
-  if(!scene.texture_manager.isLoaded(texture_filename)){
-    TextureComponentData data = { 
-      ImageLoader::load(asset_path+std::string("textures/")+texture_filename),
-      0
-    };
-    scene.texture_manager.load(texture_filename, data);
+  // Get the filename
+  name_cstr = xmlGetProp(node, BAD_CAST "normal");
+  if(name_cstr == NULL){
+    LOG(LL::Warn, "Warning, normal file name not found");
   }
-  entity_manager.addTextureComponent(entity, { texture_filename });
+  std::string normal_filename(reinterpret_cast<const char*>(name_cstr));
+  xmlFree(name_cstr);
+
+  std::string key = texture_filename + " " + normal_filename;
+  LOG(LL::Verbose, "texture file: ", texture_filename, ", normal file: ", normal_filename);
+  if(!scene.texture_manager.isLoaded(key)){
+    std::shared_ptr<TextureComponentData> data = std::make_shared<TextureComponentData>();
+    data->color_map = ImageLoader::load(asset_path+std::string("textures/")+texture_filename);
+    data->normal_map = ImageLoader::load(asset_path+std::string("textures/")+normal_filename);
+    data->color_id = 0;
+    data->normal_id = 0;
+    scene.texture_manager.load(key, data);
+  }
+  entity_manager.addTextureComponent(entity, { key });
 }
 
 glm::vec3 load_vec3(xmlNodePtr& node){

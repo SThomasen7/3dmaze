@@ -29,10 +29,10 @@ public:
     return false;
   }
   
-  inline std::shared_ptr<T> get(const std::string &key){
+  inline T get(const std::string &key){
     auto it = items.find(key);
     if(it != items.end()){
-      return std::make_shared<T>(it->second);
+      return it->second;
     }
     return nullptr;
   }

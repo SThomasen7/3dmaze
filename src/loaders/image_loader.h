@@ -4,13 +4,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 
 #include "image.h"
+#include <memory>
 
 class ImageLoader{
 
 public:
 
-  static Image load(std::string filename);
-  static void free(Image& image);
+  static std::shared_ptr<Image> load(std::string filename);
+  static void free(std::shared_ptr<Image> image);
 
 private:
   ImageLoader() {}

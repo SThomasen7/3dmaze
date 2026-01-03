@@ -13,11 +13,11 @@ GLuint create_program(std::string vertex, std::string fragment);
 bool compile_shader(GLuint& shader, std::string filename, std::string &shader_code);
 
 // Shader Loader class functions
-ShaderComponentData ShaderLoader::load(
+std::shared_ptr<ShaderComponentData> ShaderLoader::load(
     std::string vertex_name, std::string fragment_name){
 
-  ShaderComponentData shader;
-  shader.program = create_program(vertex_name, fragment_name);
+  std::shared_ptr<ShaderComponentData> shader = std::make_shared<ShaderComponentData>();
+  shader->program = create_program(vertex_name, fragment_name);
 
   return shader;
 }
@@ -106,6 +106,13 @@ GLuint create_program(std::string vertex, std::string frag) {
         ", ", frag, ") :", infoLog);
     return 0;
   }
+
+  // Do this just once, here we won't check errors because I don't really care if the
+  // shader doesn't have these samplers.
+  /*glUseProgram(shaderProgram);
+  glUniform1i(glGetUniformLocation(shaderProgram, "tex_sampler"), 0);
+  glUniform1i(glGetUniformLocation(shaderProgram, "norm_sampler"), 1);*/
+
   return shaderProgram;
 }
 

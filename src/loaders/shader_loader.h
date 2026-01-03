@@ -3,11 +3,12 @@
 
 #include "shader_component.h"
 #include <string>
+#include <memory>
 
 class ShaderLoader{
 
 public:
-  static ShaderComponentData load(
+  static std::shared_ptr<ShaderComponentData> load(
       std::string vertex_name, std::string fragment_name
   );
 

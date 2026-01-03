@@ -15,6 +15,7 @@ out vec3 norm;
 out vec3 tangent;
 out vec3 bittangent;
 out vec2 tex;
+out mat3 TBN;
 
 void main()
 {
@@ -25,6 +26,10 @@ void main()
   tangent = _tangent;
   bittangent = _bittangent;
   tex = _tex;
-  //color = vec3(0.0f, (_pos.y+1)/2, 0.0);
-  //color = normalize(_norm) * 0.5 + 0.5;
+
+  vec3 N = normalize(normalMatrix * _norm);
+  vec3 T = normalize(normalMatrix * _tangent);
+  vec3 B = normalize(normalMatrix * _bittangent);
+
+  TBN = mat3(T, B, N);
 }

@@ -25,7 +25,7 @@ RenderSystem::RenderSystem() { }
 
 RenderComponent create_render_component(const MeshComponentData& mesh);
 void destroy_render_component(RenderComponent& render);
-void load_texture(TextureComponentData& data);
+GLuint load_texture(std::shared_ptr<Image> image);
 void clear_texture(TextureComponentData& data);
 
 void RenderSystem::init(EventDispatcher* dispatcher){
@@ -134,17 +134,24 @@ void RenderSystem::process(Scene& scene, float dt){
     CHECK_OGL_ERROR();
 
     // Get the texture if there is one.
-    GLuint texture_id = 0;
+    GLuint tex_color_id = 0;
+    GLuint tex_normal_id = 0;
     if(entity_manager.hasEntityType<TextureComponent>(*entity_ptr)){
       TextureComponent component = entity_manager.getTexture(*entity_ptr);
       std::shared_ptr<TextureComponentData> tex_data = scene.texture_manager.get(component.key);
-      texture_id = tex_data->id;
+      tex_color_id = tex_data->color_id;
+      tex_normal_id = tex_data->normal_id;
     }
 
     for(size_t i = 0; i < render_c.mesh_count; i++){
+      if(tex_color_id != 0){
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex_color_id);
+      }
 
-      if(texture_id != 0){
-        glBindTexture(GL_TEXTURE_2D, texture_id);
+      if(tex_normal_id != 0){
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex_normal_id);
       }
 
       glBindVertexArray(render_c.VAO[i]);
@@ -179,7 +186,7 @@ void RenderSystem::preLoadScene(Scene& scene){
   glFrontFace(GL_CCW);
 
   EntityManager& entity_manager = scene.getEntityManager();
-  ResourceManager<MeshComponentData>& mesh_manager = scene.mesh_manager;
+  ResourceManager<std::shared_ptr<MeshComponentData>>& mesh_manager = scene.mesh_manager;
 
   // Create the view
   using EntityView = EntityManager::EntityView;
@@ -256,9 +263,15 @@ void RenderSystem::preLoadScene(Scene& scene){
   for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
     TextureComponent texture_component = entity_manager.getTexture(*entity_ptr);
     std::shared_ptr<TextureComponentData> texture = scene.texture_manager.get(texture_component.key);
-    if(texture->id == 0){
-      load_texture(*texture);
+    if(texture->color_id == 0 && texture->color_map != nullptr){
+      texture->color_id = load_texture(texture->color_map);
     }
+    if(texture->normal_id == 0 && texture->normal_map != nullptr){
+      texture->normal_id = load_texture(texture->normal_map);
+    }
+    LOG(LL::Verbose, "Loaded textures: ", texture->color_id, " ", texture->normal_id);
+    texture = scene.texture_manager.get(texture_component.key);
+    LOG(LL::Verbose, "Loaded textures: ", texture->color_id, " ", texture->normal_id);
   }
   entity_manager.destroyEntityView(&eview);
 
@@ -453,10 +466,12 @@ void RenderSystem::loadSceneLights(Scene& scene){
 
 }
 
-void load_texture(TextureComponentData& data){
-  glGenTextures(1, &(data.id));
+GLuint load_texture(std::shared_ptr<Image> image){
+  GLuint tex_id;
+  glGenTextures(1, &tex_id);
+  LOG(LL::Verbose, "Loading opengl texture: ", tex_id);
   CHECK_OGL_ERROR();
-  glBindTexture(GL_TEXTURE_2D, data.id);
+  glBindTexture(GL_TEXTURE_2D, tex_id);
   CHECK_OGL_ERROR();
 
   // set the texture wrapping/filtering options (on the currently bound texture object)
@@ -469,15 +484,18 @@ void load_texture(TextureComponentData& data){
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   CHECK_OGL_ERROR();
 
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data.image.width, data.image.height, 0, 
-      GL_RGB, GL_UNSIGNED_BYTE, data.image.data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image->width, image->height, 0, 
+      GL_RGB, GL_UNSIGNED_BYTE, image->data);
   CHECK_OGL_ERROR();
   glGenerateMipmap(GL_TEXTURE_2D);
   CHECK_OGL_ERROR();
+  return tex_id;
 }
 
 void clear_texture(TextureComponentData& data){
-  glDeleteTextures(1, &(data.id));
-  data.id = 0;
+  glDeleteTextures(1, &(data.color_id));
+  glDeleteTextures(1, &(data.normal_id));
+  data.color_id = 0;
+  data.normal_id = 0;
 }
 

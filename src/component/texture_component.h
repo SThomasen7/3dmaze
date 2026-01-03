@@ -2,6 +2,7 @@
 #define _TEXTURE_COMPONENT_H_ 1
 
 #include <string>
+#include <memory>
 #include "image.h"
 #include "opengl_headers.h"
 
@@ -10,8 +11,10 @@ struct TextureComponent{
 };
 
 struct TextureComponentData{
-  Image image;
-  GLuint id;
+  std::shared_ptr<Image> color_map;
+  std::shared_ptr<Image> normal_map;
+  GLuint color_id;
+  GLuint normal_id;
 };
 
 #endif

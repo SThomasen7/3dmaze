@@ -5,10 +5,12 @@ in vec3 norm;
 in vec3 tangent;
 in vec3 bittangent;
 in vec2 tex;
-in vec3 color;
+in mat3 TBN;
+
 uniform vec3 camera_pos;
 
-uniform sampler2D tex_sampler;
+layout (binding=0) uniform sampler2D tex_sampler;
+layout (binding=1) uniform sampler2D norm_sampler;
 
 const int MAX_LIGHTS = 16;
 
@@ -38,13 +40,18 @@ const vec3 ambient_color = vec3(1.0f);
 void main()
 {
 
+  vec3 sampled_norm = texture(norm_sampler, tex).rgb;
+  FragColor = texture(norm_sampler, tex);
+  //return;
+  sampled_norm = sampled_norm * 2.0 - 1.0;
+  sampled_norm = normalize(TBN * sampled_norm);
   // Get the color from the lights
   vec3 out_light = vec3(0.0f, 0.0f, 0.0f);
   for(int i = 0; i < MAX_LIGHTS; ++i){
     if(lights[i].active == 0){
       continue;
     }
-    out_light += calc_light(lights[i], pos, norm, camera_pos);
+    out_light += calc_light(lights[i], pos, sampled_norm, camera_pos);
   }
 
   //vec3 color = vec3(0.7f, 0.7f, 0.7f);
@@ -60,14 +67,15 @@ vec3 calc_light(LightStruct light, vec3 point, vec3 normal,
     vec3 camera){
 
   // Get the diffuse factor
-  vec3 to_light = normalize(light.position - point);
+  vec3 light_pos = light.position;
+  vec3 to_light = normalize(light_pos - point);
   vec3 v_normal = normalize(normal);
   vec3 to_camera = normalize(camera - point);
   if (!gl_FrontFacing)
     v_normal = -v_normal;
 
-  vec3 light_dir = normalize(light.target - light.position);
-  float dist = distance(point, light.position);
+  vec3 light_dir = normalize(light.target - light_pos);
+  float dist = distance(point, light_pos);
   
   float spec_exp = 128.0f;
   float spec_mat = 0.9f;

@@ -65,7 +65,9 @@
       -->
     <mesh name='bunny.obj'></mesh>
     <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
-    <texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' />
+    <texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' 
+             normal='TilesSquarePoolMixed001/TilesSquarePoolMixed001_NRM_2K.jpg' 
+    />
   </asset>
   <asset>
     <transformation>

@@ -8,21 +8,21 @@
 #include "consts.h"
 #include "logger.h"
 
-void load_triangle_meshes(MeshComponentData& mesh, std::string filename);
+void load_triangle_meshes(std::shared_ptr<MeshComponentData> mesh, std::string filename);
 Mesh load_triangle_mesh(aiMesh* mesh);
 
-MeshComponentData MeshLoader::load(std::string filename){
-  MeshComponentData mesh;
+std::shared_ptr<MeshComponentData> MeshLoader::load(std::string filename){
+  std::shared_ptr<MeshComponentData> mesh = std::make_shared<MeshComponentData>();
   LOG(LL::Verbose, "Loading mesh: ");
   LOG(LL::Verbose, asset_path+std::string("obj/")+filename);
   load_triangle_meshes(mesh, asset_path+std::string("obj/")+filename);
   return mesh;
 }
 
-void MeshLoader::free(MeshComponentData& mesh_component){
+void MeshLoader::free(std::shared_ptr<MeshComponentData> mesh_component){
   // Free the buffer data
-  for(size_t i = 0; i < mesh_component.mesh_count; i++){
-    Mesh& mesh = mesh_component.meshes[i];
+  for(size_t i = 0; i < mesh_component->mesh_count; i++){
+    Mesh& mesh = mesh_component->meshes[i];
   
     if(mesh.index != nullptr){
       delete[] mesh.index;
@@ -51,11 +51,11 @@ void MeshLoader::free(MeshComponentData& mesh_component){
       mesh.bittangent = nullptr;
     }
   }
-  delete[] mesh_component.meshes;
-  mesh_component.mesh_count = 0;
+  delete[] mesh_component->meshes;
+  mesh_component->mesh_count = 0;
 }
 
-void load_triangle_meshes(MeshComponentData& mesh, std::string filename){
+void load_triangle_meshes(std::shared_ptr<MeshComponentData> mesh, std::string filename){
   Assimp::Importer importer;
   const aiScene *scene = importer.ReadFile(filename,
                     aiProcess_Triangulate | 
@@ -75,12 +75,12 @@ void load_triangle_meshes(MeshComponentData& mesh, std::string filename){
   aiMesh **meshes = scene->mMeshes;
   size_t num_meshes = scene->mNumMeshes;
 
-  mesh.mesh_count = num_meshes;
-  mesh.meshes = new Mesh[num_meshes];
+  mesh->mesh_count = num_meshes;
+  mesh->meshes = new Mesh[num_meshes];
 
   // Load triangle meshes
   for (size_t i = 0; i < scene->mNumMeshes; i++) {
-    mesh.meshes[i] = load_triangle_mesh(meshes[i]);
+    mesh->meshes[i] = load_triangle_mesh(meshes[i]);
   }
 }
 

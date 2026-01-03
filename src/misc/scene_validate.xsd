@@ -9,6 +9,7 @@
   <!-- Define reusable texture type -->
   <xs:complexType name="textureType">
     <xs:attribute name="texture" type="xs:string" use="required"/>
+    <xs:attribute name="normal" type="xs:string" use="required"/>
   </xs:complexType>
 
   <!-- Define reusable shader type -->
