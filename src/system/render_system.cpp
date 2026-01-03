@@ -25,6 +25,8 @@ RenderSystem::RenderSystem() { }
 
 RenderComponent create_render_component(const MeshComponentData& mesh);
 void destroy_render_component(RenderComponent& render);
+void load_texture(TextureComponentData& data);
+void clear_texture(TextureComponentData& data);
 
 void RenderSystem::init(EventDispatcher* dispatcher){
   LOG(LL::Info, "Initializing Render System.");
@@ -131,7 +133,20 @@ void RenderSystem::process(Scene& scene, float dt){
     glUniform3fv(location, 1, glm::value_ptr(camera_pos_component.position));
     CHECK_OGL_ERROR();
 
+    // Get the texture if there is one.
+    GLuint texture_id = 0;
+    if(entity_manager.hasEntityType<TextureComponent>(*entity_ptr)){
+      TextureComponent component = entity_manager.getTexture(*entity_ptr);
+      std::shared_ptr<TextureComponentData> tex_data = scene.texture_manager.get(component.key);
+      texture_id = tex_data->id;
+    }
+
     for(size_t i = 0; i < render_c.mesh_count; i++){
+
+      if(texture_id != 0){
+        glBindTexture(GL_TEXTURE_2D, texture_id);
+      }
+
       glBindVertexArray(render_c.VAO[i]);
       CHECK_OGL_ERROR();
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render_c.VIO[i]);
@@ -235,6 +250,18 @@ void RenderSystem::preLoadScene(Scene& scene){
   glBindBufferBase(GL_UNIFORM_BUFFER, 0, ubo);
   delete[] light_data;
 
+  // Load texture data
+  eview = 
+    entity_manager.createEntityView<TextureComponent>();
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    TextureComponent texture_component = entity_manager.getTexture(*entity_ptr);
+    std::shared_ptr<TextureComponentData> texture = scene.texture_manager.get(texture_component.key);
+    if(texture->id == 0){
+      load_texture(*texture);
+    }
+  }
+  entity_manager.destroyEntityView(&eview);
+
 }
 
 void RenderSystem::clearScene(Scene& scene){
@@ -251,6 +278,17 @@ void RenderSystem::clearScene(Scene& scene){
     RenderComponent component = entity_manager.getRender(*entity_ptr);
     destroy_render_component(component);
   }
+  entity_manager.destroyEntityView(&eview);
+
+  // Clean up the textures
+  eview = 
+    entity_manager.createEntityView<TextureComponent>();
+  for(auto entity_ptr = eview->begin(); entity_ptr != eview->end(); entity_ptr++){
+    TextureComponent texture_component = entity_manager.getTexture(*entity_ptr);
+    std::shared_ptr<TextureComponentData> texture = scene.texture_manager.get(texture_component.key);
+    clear_texture(*texture);
+  }
+  entity_manager.destroyEntityView(&eview);
 }
 
 RenderComponent create_render_component(const MeshComponentData& meshes){
@@ -414,3 +452,32 @@ void RenderSystem::loadSceneLights(Scene& scene){
 
 
 }
+
+void load_texture(TextureComponentData& data){
+  glGenTextures(1, &(data.id));
+  CHECK_OGL_ERROR();
+  glBindTexture(GL_TEXTURE_2D, data.id);
+  CHECK_OGL_ERROR();
+
+  // set the texture wrapping/filtering options (on the currently bound texture object)
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  CHECK_OGL_ERROR();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  CHECK_OGL_ERROR();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+  CHECK_OGL_ERROR();
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  CHECK_OGL_ERROR();
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data.image.width, data.image.height, 0, 
+      GL_RGB, GL_UNSIGNED_BYTE, data.image.data);
+  CHECK_OGL_ERROR();
+  glGenerateMipmap(GL_TEXTURE_2D);
+  CHECK_OGL_ERROR();
+}
+
+void clear_texture(TextureComponentData& data){
+  glDeleteTextures(1, &(data.id));
+  data.id = 0;
+}
+

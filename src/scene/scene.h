@@ -22,6 +22,7 @@ public:
 
   ResourceManager<ShaderComponentData> shader_manager;
   ResourceManager<MeshComponentData> mesh_manager;
+  ResourceManager<TextureComponentData> texture_manager;
 
 private:
 

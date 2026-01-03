@@ -1,5 +1,6 @@
 # Set GLFW, OpenGL, and ImGui source directories
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/third_party/imgui)
+set(STB_IMAGE_DIR ${CMAKE_SOURCE_DIR}/third_party/stb_image)
 
 # add ImGui source files
 file(GLOB IMGUI_SOURCES
@@ -20,6 +21,7 @@ file(GLOB SOURCE_FILES
   scene/*.cpp
   loaders/*.cpp
   event/*.cpp
+  resource/*.cpp
   ${IMGUI_SOURCES}
 )
 
@@ -42,6 +44,7 @@ add_library(MazeTestLib
 target_include_directories(MazeLib PUBLIC
   ${GLM_DIR}
   ${IMGUI_DIR}
+  ${STB_IMAGE_DIR}
   component/
   engine/
   entity/
@@ -51,6 +54,7 @@ target_include_directories(MazeLib PUBLIC
   scene/
   loaders/
   event/
+  resource/
 )
 
 target_include_directories(MazeTestLib PUBLIC

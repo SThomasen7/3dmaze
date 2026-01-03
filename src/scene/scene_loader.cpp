@@ -3,6 +3,7 @@
 #include "transform_component.h"
 #include "mesh_loader.h"
 #include "shader_loader.h"
+#include "image_loader.h"
 #include "consts.h"
 
 #include "transform_component.h"
@@ -13,6 +14,7 @@
 #include "position_component.h"
 #include "light_direction_component.h"
 #include "light_angle_component.h"
+#include "texture_component.h"
 
 #include <libxml/parser.h>
 #include <libxml/xmlschemas.h>
@@ -36,6 +38,7 @@ void create_light_component(Scene& scene, Entity entity, xmlNodePtr& node);
 void create_transform_component(Scene& scene, Entity entity, xmlNodePtr& node);
 void create_mesh_component(Scene& scene, Entity entity, xmlNodePtr& node);
 void create_shader_component(Scene& scene, Entity entity, xmlNodePtr& node);
+void create_texture_component(Scene& scene, Entity entity, xmlNodePtr& node);
 
 glm::vec3 load_vec3(xmlNodePtr& node);
 glm::vec4 load_vec4(xmlNodePtr& node);
@@ -134,6 +137,10 @@ void create_scene_nodes(Scene& scene, xmlNodePtr& xml_node){
     }
     else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "shader")) {
       create_shader_component(scene, entity, cur);
+      continue;
+    }
+    else if (cur->type == XML_ELEMENT_NODE && xmlStrEqual(cur->name, BAD_CAST "texture")) {
+      create_texture_component(scene, entity, cur);
       continue;
     }
     create_scene_nodes(scene, cur);
@@ -439,6 +446,30 @@ void create_shader_component(Scene& scene, Entity entity, xmlNodePtr& node){
   entity_manager.addShaderComponent(entity, { key });
 }
 
+
+void create_texture_component(Scene& scene, Entity entity, xmlNodePtr& node){
+  EntityManager& entity_manager = scene.getEntityManager();
+  LOG(LL::Verbose, "Loading texture component.");
+
+  // Get the filename
+  xmlChar *name_cstr = xmlGetProp(node, BAD_CAST "texture");
+  if(name_cstr == NULL){
+    LOG(LL::Warn, "Warning, texture file name not found");
+  }
+  std::string texture_filename(reinterpret_cast<const char*>(name_cstr));
+  xmlFree(name_cstr);
+
+  LOG(LL::Verbose, "texture file: "+texture_filename);
+  if(!scene.texture_manager.isLoaded(texture_filename)){
+    TextureComponentData data = { 
+      ImageLoader::load(asset_path+std::string("textures/")+texture_filename),
+      0
+    };
+    scene.texture_manager.load(texture_filename, data);
+  }
+  entity_manager.addTextureComponent(entity, { texture_filename });
+}
+
 glm::vec3 load_vec3(xmlNodePtr& node){
   glm::vec3 out;
   xmlChar *x_cstr = xmlGetProp(node, BAD_CAST "x");
@@ -515,6 +546,6 @@ std::string get_name(xmlNodePtr& node){
   return name_str;
 }
 
-void SceneLoader::free(Scene& scene, std::string filename){
+void SceneLoader::free(Scene& scene){
 
 };

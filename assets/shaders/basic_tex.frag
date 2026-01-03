@@ -1,24 +1,26 @@
-#version 430 core
+#version 420 core
 out vec4 FragColor;
 in vec3 pos;
-in vec3 t_pos;
+in vec3 norm;
+in vec3 tangent;
+in vec3 bittangent;
 in vec2 tex;
-in mat3 TBN;
-uniform int num_lights;
-uniform bool flashlight;
-
+in vec3 color;
 uniform vec3 camera_pos;
-uniform vec3 camera_front;
+
+uniform sampler2D tex_sampler;
 
 const int MAX_LIGHTS = 16;
 
 struct LightStruct{
   vec3 position;
-  vec3 color;
+  float angle;
   vec3 target;
   float attenuation;
-  float radius; // Degrees
-  bool is_active;
+  vec3 color;
+  float _;
+  int attenuation_type;
+  int active;
 };
 
 layout(std140, binding=0) uniform Lights
@@ -26,99 +28,85 @@ layout(std140, binding=0) uniform Lights
     LightStruct lights[MAX_LIGHTS];
 };
 
-vec3 calc_light(LightStruct light, vec3 position, vec3 camera);
-LightStruct get_flashlight();
-const float ambient_factor = 0.2f;
 
-uniform sampler2D color_texture;
-uniform sampler2D normal_texture;
-uniform sampler2D specular_texture;
+vec3 calc_light(LightStruct light, vec3 position, vec3 normal,
+                vec3 camera);
+
+const float ambient_factor = 0.20f;
+const vec3 ambient_color = vec3(1.0f);
 
 void main()
 {
 
   // Get the color from the lights
   vec3 out_light = vec3(0.0f, 0.0f, 0.0f);
-  for(int i = 0; i < num_lights; ++i){
-    out_light += calc_light(lights[i], pos, camera_pos);
+  for(int i = 0; i < MAX_LIGHTS; ++i){
+    if(lights[i].active == 0){
+      continue;
+    }
+    out_light += calc_light(lights[i], pos, norm, camera_pos);
   }
 
-  // Add flashlight color
-  out_light += calc_light(get_flashlight(), pos, camera_pos);
-  //out_light = normalize(t_pos);
+  //vec3 color = vec3(0.7f, 0.7f, 0.7f);
 
-  // Sample texture color
-  vec3 color = texture(color_texture, tex).rgb;
+  vec3 ambient = ambient_color * ambient_factor;
+  vec4 final_light = vec4(clamp(ambient + out_light, 0.0, 1.0), 1.0);
+  FragColor = texture(tex_sampler, tex) * final_light;
 
-  // output color
-  FragColor = vec4(
-      clamp((out_light*color)+
-        clamp(color*ambient_factor, 0.0f, 1.0f),
-        0.0f, 1.0f), 1.0f);
 }
 
 // Calculate lighting for this fragment
-vec3 calc_light(LightStruct light, vec3 point, vec3 camera){
-
-  if(!light.is_active){
-    return vec3(0.0f, 0.0f, 0.0f);
-  }
+vec3 calc_light(LightStruct light, vec3 point, vec3 normal,
+    vec3 camera){
 
   // Get the diffuse factor
   vec3 to_light = normalize(light.position - point);
+  vec3 v_normal = normalize(normal);
   vec3 to_camera = normalize(camera - point);
-  
-  vec3 v_normal = texture(normal_texture, tex).rgb;
-  v_normal = v_normal * 2.0 - 1.0;
-  v_normal = normalize(TBN * v_normal);
-
-  //if(dot(v_normal, -to_camera) > 0.0f){
-    //v_normal = -v_normal;
-  //}
+  if (!gl_FrontFacing)
+    v_normal = -v_normal;
 
   vec3 light_dir = normalize(light.target - light.position);
   float dist = distance(point, light.position);
   
   float spec_exp = 128.0f;
-  float spec_mat = texture(specular_texture, tex).r;
+  float spec_mat = 0.9f;
 
-  vec3 N = max(dot(to_light, v_normal), 0.0f)*v_normal;
-  vec3 R = (2.0*N)-to_light;
+  vec3 R = reflect(-to_light, v_normal);
 
+  float diffuse_factor = max(dot(v_normal, to_light), 0.0);
 
-  float diffuse_factor = abs(max(dot(to_light, v_normal), 0.0f))*light.attenuation;
   float specular_factor = pow(clamp(dot(R, to_camera), 0.0f, 1.0f), spec_exp)*
-    spec_mat*light.attenuation;
+    spec_mat;
 
-  float loss = 1.0f / (dist/2.0f); 
-  //loss = loss * (max(dot(-to_light, light_dir), 0.0f)*max(dot(-to_light, light_dir), 0.0f));
-  //loss = loss / (degrees(acos(dot(-to_light, light_dir))) / 4.0f);
+  //float loss = 1.0f / (dist/4.0f); 
+  float loss = 1.0 / (1.0 + dist * dist);
+  if(light.attenuation_type == 0){
+    loss = light.attenuation;
+  }
+  else if(light.attenuation_type == 1){
+    loss = 1.0 / (1.0 + dist);
+  }
 
-  if(dot(to_light, v_normal) <= 0.0f ||
-      cos(radians(light.radius)) > max(dot(-to_light, light_dir), 0.0f)){
+  float theta = degrees(acos(dot(normalize(-to_light), normalize(light_dir))));
+  float cutoff = light.angle;
+
+  if(theta >= cutoff){
     diffuse_factor = 0.0f;
     specular_factor = 0.0f;
+  }
+  else{
+    float factor = cutoff - theta;
+    factor = 1 - exp(-factor*0.5);
+    diffuse_factor *= factor;
+    specular_factor *= factor;
+
   }
 
   specular_factor *= loss;
   diffuse_factor *= loss;
 
-  return light.color * 
-    min((diffuse_factor + specular_factor), 1.0f); 
+  return light.color * (diffuse_factor+specular_factor);
+
 }
 
-// Get flashlight details
-LightStruct get_flashlight(){
-  vec3 pos = camera_pos;
-  vec3 front = camera_front;
-  pos.y -= 0.5f;
-  front.y -= 0.5f;
-  return LightStruct(
-    pos,
-    vec3(1.0f, 1.0f, 0.8f),
-    front,
-    0.6f,
-    30.0f,
-    flashlight
-  );
-}

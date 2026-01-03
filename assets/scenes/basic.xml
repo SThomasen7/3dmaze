@@ -51,7 +51,7 @@
       -->
     </transformation>
     <mesh name='sewer_scene_fixed.obj'></mesh>
-    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+    <shader vertex='basic_tex.vert' fragment='basic_tex.frag'/>
   </asset>
   <asset>
     <transformation>
@@ -65,6 +65,7 @@
       -->
     <mesh name='bunny.obj'></mesh>
     <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+    <texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' />
   </asset>
   <asset>
     <transformation>

@@ -102,6 +102,11 @@ bool EntityManager::hasEntityTypeImpl(const Entity& entity, std::type_index type
       return false;
     }
   }
+  else if(type == std::type_index(typeid(TextureComponent))){
+    if(!texture_pool.contains(entity)){
+      return false;
+    }
+  }
   return true;
 }
 
@@ -262,5 +267,17 @@ CameraMovementQueueComponent& EntityManager::getCameraMovementQueue(Entity& enti
 
 CameraMovementQueueComponent EntityManager::getCameraMovementQueue(const Entity& entity) const{
   return camera_movement_queue_pool.at(entity);
+}
+
+void EntityManager::addTextureComponent(const Entity& entity, TextureComponent texture){
+  texture_pool[entity] = texture;
+}
+
+TextureComponent& EntityManager::getTexture(Entity& entity){
+  return texture_pool.at(entity);
+}
+
+TextureComponent EntityManager::getTexture(const Entity& entity) const{
+  return texture_pool.at(entity);
 }
 

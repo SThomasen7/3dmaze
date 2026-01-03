@@ -6,6 +6,11 @@
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <!-- Define reusable texture type -->
+  <xs:complexType name="textureType">
+    <xs:attribute name="texture" type="xs:string" use="required"/>
+  </xs:complexType>
+
   <!-- Define reusable shader type -->
   <xs:complexType name="shaderType">
     <xs:attribute name="vertex" type="xs:string" use="required"/>
@@ -103,6 +108,7 @@
               <xs:element name="transformation" type="transformationType" minOccurs="0" maxOccurs="1"/>
               <xs:element name="mesh" type="meshType" minOccurs="0" maxOccurs="1"/>
               <xs:element name="shader" type="shaderType" minOccurs="0" maxOccurs="1"/>
+              <xs:element name="texture" type="textureType" minOccurs="0" maxOccurs="1"/>
 
               <!-- Assets can also have nested assets -->
               <xs:element name="asset" minOccurs="0" maxOccurs="unbounded"/>
