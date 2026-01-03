@@ -37,7 +37,10 @@
       -->
     </transformation>
     <mesh name='cube.obj'></mesh>
-    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+    <shader vertex='basic_tex.vert' fragment='basic_tex.frag'/>
+    <texture texture='TilesZelligeSquaresWeathered001/TilesZelligeSquaresWeathered001_COL_VAR2_2K.jpg' 
+      normal='TilesZelligeSquaresWeathered001/TilesZelligeSquaresWeathered001_NRM_2K.png' 
+    />
   </asset>
   <asset>
     <transformation>
@@ -52,6 +55,9 @@
     </transformation>
     <mesh name='sewer_scene_fixed.obj'></mesh>
     <shader vertex='basic_tex.vert' fragment='basic_tex.frag'/>
+    <texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' 
+             normal='TilesSquarePoolMixed001/TilesSquarePoolMixed001_NRM_2K.jpg' 
+    />
   </asset>
   <asset>
     <transformation>
@@ -65,9 +71,12 @@
       -->
     <mesh name='bunny.obj'></mesh>
     <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
-    <texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' 
+    <!--<texture texture='TilesSquarePoolMixed001/TilesSquarePoolMixed001_COL_2K.jpg' 
              normal='TilesSquarePoolMixed001/TilesSquarePoolMixed001_NRM_2K.jpg' 
-    />
+    />-->
+    <!--<texture texture='TilesCeramicHerringbone002/TilesCeramicHerringbone002_COL_2K.jpg' 
+        normal='TilesCeramicHerringbone002/TilesCeramicHerringbone002_NRM_2K.jpg' 
+    />-->
   </asset>
   <asset>
     <transformation>
@@ -80,6 +89,9 @@
       <col4 x='0' y='0' z='-4' w='1'/>
       -->
     <mesh name='sphere2.obj'></mesh>
-    <shader vertex='basic_light.vert' fragment='basic_light.frag'/>
+    <shader vertex='basic_tex.vert' fragment='basic_tex.frag'/>
+    <texture texture='TilesZelligeSquaresWeathered001/TilesZelligeSquaresWeathered001_COL_VAR2_2K.jpg' 
+      normal='TilesZelligeSquaresWeathered001/TilesZelligeSquaresWeathered001_NRM_2K.png' 
+    />
   </asset>
 </scene>
