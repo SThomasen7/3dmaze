@@ -30,7 +30,7 @@ layout(std140, binding=0) uniform Lights
 vec3 calc_light(LightStruct light, vec3 position, vec3 normal,
                 vec3 camera);
 
-const float ambient_factor = 0.20f;
+const float ambient_factor = 0.1f;
 const vec3 ambient_color = vec3(1.0f);
 
 void main()
@@ -77,11 +77,13 @@ vec3 calc_light(LightStruct light, vec3 point, vec3 normal,
 
   //float loss = 1.0f / (dist/4.0f); 
   float loss = 1.0 / (1.0 + dist * dist);
+  // constant
   if(light.attenuation_type == 0){
     loss = light.attenuation;
   }
+  // linear
   else if(light.attenuation_type == 1){
-    loss = 1.0 / (1.0 + dist);
+    loss = 1.0 / (1.0 + (dist/4.0f));
   }
 
   float theta = degrees(acos(dot(normalize(-to_light), normalize(light_dir))));

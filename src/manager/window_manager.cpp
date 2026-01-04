@@ -76,6 +76,8 @@ void WindowManager::pollEvents(ApplicationSettings& settings){
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplGlfw_NewFrame();
   ImGui::NewFrame();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glViewport(0, 0, buffer_width, buffer_height);
 }
 
 void WindowManager::renderWidgets(){
@@ -107,12 +109,14 @@ void WindowManager::makeFullScreen(){
   GLFWmonitor* monitor = glfwGetPrimaryMonitor();
   const GLFWvidmode* mode = glfwGetVideoMode(monitor);
   glfwSetWindowMonitor(window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+  glfwSwapInterval(1);
 }
 
 void WindowManager::makeWindowed(){
   LOG(LL::Verbose, "Making windowed..");
-  glfwSetWindowMonitor(window, NULL, 0, 0, 0, 0, GLFW_DONT_CARE);
   glfwSetWindowMonitor(window, NULL, buffer_width/2, buffer_height/2, 
       buffer_width, buffer_height, GLFW_DONT_CARE);
+  glfwSwapInterval(1);
 }
+
 

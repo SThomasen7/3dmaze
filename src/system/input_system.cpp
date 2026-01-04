@@ -25,8 +25,7 @@ void InputSystem::init(EventDispatcher* dispatcher){
 }
 
 void InputSystem::process(Scene& scene, float dt){
-  float move_speed = 8.0f * dt;
-  float timestep = 1.0f/60.0f; // framerate TODO make dynamic
+  float move_speed = 4.0f * dt;
   GLFWwindow* window = window_manager->getWindow();
   EntityManager& entity_manager = scene.getEntityManager();
 
@@ -38,16 +37,16 @@ void InputSystem::process(Scene& scene, float dt){
 
   // Calculate the movement direction
   if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-    move += glm::vec3(1.0f, 0.0f, 0.0f);
+    move += glm::vec3(0.0f, 0.0f, 1.0f);
   }
   if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-    move += glm::vec3(-1.0f, 0.0f, 0.0f);
-  }
-  if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
     move += glm::vec3(0.0f, 0.0f, -1.0f);
   }
+  if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+    move += glm::vec3(-1.0f, 0.0f, 0.0f);
+  }
   if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-    move += glm::vec3(0.0f, 0.0f, 1.0f);
+    move += glm::vec3(1.0f, 0.0f, 0.0f);
   }
   if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
     move += glm::vec3(0.0f, 1.0f, 0.0f);
@@ -143,6 +142,7 @@ void InputSystem::keyCallback(GLFWwindow* window, int key, int scancode, int act
 }
 
 void InputSystem::framebufferSizeCallback(GLFWwindow* window, int width, int height){
+  LOG(LL::Verbose, "Frame buffer resize callback: ", width, " ", height);
   ResizeScreenEvent resize_event(width, height);
   auto* self = static_cast<InputSystem*>(
         glfwGetWindowUserPointer(window)

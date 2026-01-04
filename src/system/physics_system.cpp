@@ -52,8 +52,8 @@ void PhysicsSystem::resolve_camera_movements(Scene& scene){
           component.pans[i].y, ")");
       LOG(LL::Verbose, "lookat (", camera_component.lookat.x, " ", 
           camera_component.lookat.y, " ", camera_component.lookat.z, ")");
-      glm::vec3 displace = glm::mat3(camera_component.lookat, camera_component.up,
-            camera_component.right) * component.movements[i];
+      glm::vec3 displace = glm::mat3(camera_component.right, camera_component.up,
+            camera_component.lookat) * component.movements[i];
       pos_component.position += displace;
       LOG(LL::Verbose, "Moving camera delta: (", displace.x, " ", displace.y,
           " ", displace.z, ")");
@@ -76,11 +76,11 @@ void PhysicsSystem::rotate_camera_x_y(CameraComponent& camera, float x, float y)
     y = -89.0f;
   }
 
-  glm::vec2 smoothed = glm::mix(glm::vec2(camera.yaw, camera.pitch),
+  /*glm::vec2 smoothed = glm::mix(glm::vec2(camera.yaw, camera.pitch),
       glm::vec2(x, y), 0.25f);
 
   x = smoothed.x;
-  y = smoothed.y;
+  y = smoothed.y;*/
   camera.yaw = x;
   camera.pitch = y;
   LOG(LL::Verbose, "Pitch, yaw (2): ", camera.pitch, " ", camera.yaw);
@@ -91,6 +91,12 @@ void PhysicsSystem::rotate_camera_x_y(CameraComponent& camera, float x, float y)
   camera.lookat.y = sin(y);
   camera.lookat.z = cos(y) * sin(x);
   camera.lookat = glm::normalize(camera.lookat);
-  camera.right = glm::cross(camera.lookat, camera.up);
+  camera.right = glm::normalize(cross(camera.lookat, camera.up));
+  LOG(LL::Verbose, "lookat (", camera.lookat.x, " ", 
+      camera.lookat.y, " ", camera.lookat.z, ")");
+  LOG(LL::Verbose, "right (", camera.right.x, " ", 
+      camera.right.y, " ", camera.right.z, ")");
+  LOG(LL::Verbose, "up (", camera.up.x, " ", 
+      camera.up.y, " ", camera.up.z, ")");
 }
 
