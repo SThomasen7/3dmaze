@@ -25,7 +25,7 @@ void InputSystem::init(EventDispatcher* dispatcher){
 }
 
 void InputSystem::process(Scene& scene, float dt){
-  float move_speed = 4.0f * dt;
+  float move_speed = 8.0f * dt;
   GLFWwindow* window = window_manager->getWindow();
   EntityManager& entity_manager = scene.getEntityManager();
 
