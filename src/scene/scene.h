@@ -21,6 +21,7 @@ public:
   void setEventDispatcher(EventDispatcher* dispatcher);
 
   int active_camera;
+  Entity* default_texture;
 
   ResourceManager<std::shared_ptr<ShaderComponentData>> shader_manager;
   ResourceManager<std::shared_ptr<MeshComponentData>> mesh_manager;

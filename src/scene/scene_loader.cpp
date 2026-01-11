@@ -103,6 +103,26 @@ void SceneLoader::load(Scene& scene, std::string filename){
   xmlSchemaFreeValidCtxt(valid_ctxt);
   xmlSchemaFree(schema);
   xmlCleanupParser();
+
+  // Load the default texture
+  EntityManager& entity_manager = scene.getEntityManager();
+  Entity entity = entity_manager.createEntity();
+
+  std::string texture_filename = "missing/missing_color.png";
+  std::string normal_filename = "missing/missing_normal.png";
+  std::string key = texture_filename + " " + normal_filename;
+  LOG(LL::Verbose, "default texture file: ", texture_filename, ", normal file: ", normal_filename);
+  if(!scene.texture_manager.isLoaded(key)){
+    std::shared_ptr<TextureComponentData> data = std::make_shared<TextureComponentData>();
+    data->color_map = ImageLoader::load(asset_path+std::string("textures/")+texture_filename);
+    data->normal_map = ImageLoader::load(asset_path+std::string("textures/")+normal_filename);
+    data->color_id = 0;
+    data->normal_id = 0;
+    scene.texture_manager.load(key, data);
+  }
+  entity_manager.addTextureComponent(entity, { key });
+  scene.default_texture = &entity;
+
 }
 
 
